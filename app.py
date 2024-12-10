@@ -3,6 +3,8 @@ import streamlit as st
 from login import login
 from registration import register_user
 from data_load import load_data
+from data_visualization import visualize_data
+from moving import display_moving_analysis
 
 # Initialize session state variables
 if "authenticated" not in st.session_state:
@@ -29,10 +31,16 @@ if st.session_state.authenticated:
     st.sidebar.button("Logout", on_click=logout, key="logout_button")
     st.sidebar.title("Stock Prediction Menu")
     st.sidebar.button("Load Stock Data", on_click=set_page, args=("Load Data",), key="load_data_button")
+    st.sidebar.button("Visualize Data", on_click=set_page, args=("Visualize Data",), key="visualize_data_button")
+    st.sidebar.button("Moving Analysis", on_click=set_page, args=("Moving Analysis",), key="moving_analysis_button")
 
     # Display the current page
     if st.session_state.page == "Load Data":
         load_data()
+    elif st.session_state.page == "Visualize Data":
+        visualize_data()
+    elif st.session_state.page == "Moving Analysis":
+        display_moving_analysis()
 else:
     # User options for login and registration
     st.sidebar.title("User Options")
