@@ -5,6 +5,9 @@ from registration import register_user
 from data_load import load_data
 from data_visualization import visualize_data
 from moving import display_moving_analysis
+from data_preprocessing import preprocess_data
+from check_stationarity import check_stationarity
+from transformation import apply_transformations
 
 # Initialize session state variables
 if "authenticated" not in st.session_state:
@@ -33,6 +36,10 @@ if st.session_state.authenticated:
     st.sidebar.button("Load Stock Data", on_click=set_page, args=("Load Data",), key="load_data_button")
     st.sidebar.button("Visualize Data", on_click=set_page, args=("Visualize Data",), key="visualize_data_button")
     st.sidebar.button("Moving Analysis", on_click=set_page, args=("Moving Analysis",), key="moving_analysis_button")
+    st.sidebar.button("Preprocess Data", on_click=set_page, args=("Preprocess Data",), key="preprocess_data_button")
+    st.sidebar.button("Check Stationarity", on_click=set_page, args=("Check Stationarity",), key="check_stationarity_button")
+    st.sidebar.button("Transform Data", on_click=set_page, args=("Transform Data",), key="transform_data_button")
+
 
     # Display the current page
     if st.session_state.page == "Load Data":
@@ -41,6 +48,12 @@ if st.session_state.authenticated:
         visualize_data()
     elif st.session_state.page == "Moving Analysis":
         display_moving_analysis()
+    elif st.session_state.page == "Preprocess Data":
+        preprocess_data()
+    elif st.session_state.page == "Check Stationarity":
+        check_stationarity()
+    elif st.session_state.page == "Transform Data":
+        apply_transformations()
 else:
     # User options for login and registration
     st.sidebar.title("User Options")

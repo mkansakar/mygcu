@@ -9,8 +9,9 @@ def load_data():
     st.title("Load Stock Price Data")
 
     # Input fields for stock symbol and date range
-    stock_symbol = st.text_input("Enter Stock Symbol (e.g., AAPL):").upper()
-    start_date = st.date_input("Start Date", value=pd.to_datetime("2022-01-01"))
+    #stock_symbol = st.text_input("Enter Stock Symbol (e.g., AAPL):").upper()
+    stock_symbol = st.text_input("Enter Stock Symbol (e.g., AAPL):", value="AAPL").upper()
+    start_date = st.date_input("Start Date", value=pd.to_datetime("2022-06-01"))
     end_date = st.date_input("End Date", value=pd.to_datetime("2023-01-01"))
 
     # Restrict the date range to 1 year
