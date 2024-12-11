@@ -15,7 +15,7 @@ from check_stationarity import check_stationarity
 from transformation import apply_transformations
 from arima import arima_model
 from random_forest import random_forest_model
-from lstm import lstm_model
+#from lstm import lstm_model
 
 # Initialize session state variables
 if "authenticated" not in st.session_state:
@@ -56,7 +56,7 @@ if st.session_state.authenticated:
     st.sidebar.button("Transform Data", on_click=set_page, args=("Transform Data",), key="transform_data_button")
     st.sidebar.button("ARIMA Model", on_click=set_page, args=("ARIMA Model",), key="arima_button")
     st.sidebar.button("Random Forest Model", on_click=set_page, args=("Random Forest",), key="random_forest_button")
-    st.sidebar.button("LSTM Model", on_click=set_page, args=("LSTM",), key="lstm_button")
+    #st.sidebar.button("LSTM Model", on_click=set_page, args=("LSTM",), key="lstm_button")
     st.sidebar.button("Logout", on_click=logout, key="logout_button")
 
     # Display the current page
@@ -86,8 +86,8 @@ if st.session_state.authenticated:
         arima_model()
     elif st.session_state.page == "Random Forest":
         random_forest_model()
-    elif st.session_state.page == "LSTM":
-        lstm_model()
+    #elif st.session_state.page == "LSTM":
+    #    lstm_model()
 else:
     # User options for login and registration
     st.sidebar.title("User Options")
