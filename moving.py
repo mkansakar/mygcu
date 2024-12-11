@@ -1,78 +1,65 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import plotly.graph_objects as go
 
-
-def calculate_rsi(data, period=14):
+def calculate_rsi(data, column='Close', window=14):
     """
-    Calculate the Relative Strength Index (RSI).
+    Calculate the Relative Strength Index (RSI) without modifying the original dataset.
     """
-    delta = data['Close'].diff(1)
-    gain = delta.where(delta > 0, 0)
-    loss = -delta.where(delta < 0, 0)
-
-    avg_gain = gain.rolling(window=period, min_periods=1).mean()
-    avg_loss = loss.rolling(window=period, min_periods=1).mean()
-    rs = avg_gain / avg_loss
+    delta = data[column].diff()
+    gain = (delta.where(delta > 0, 0)).rolling(window=window).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(window=window).mean()
+    rs = gain / loss
     rsi = 100 - (100 / (1 + rs))
     return rsi
 
-
-def calculate_macd(data, short_window=12, long_window=26, signal_window=9):
+def calculate_macd(data, column='Close', short_window=12, long_window=26, signal_window=9):
     """
-    Calculate the Moving Average Convergence Divergence (MACD) and signal line.
+    Calculate the MACD and Signal Line without modifying the original dataset.
     """
-    short_ema = data['Close'].ewm(span=short_window, adjust=False).mean()
-    long_ema = data['Close'].ewm(span=long_window, adjust=False).mean()
+    short_ema = data[column].ewm(span=short_window, adjust=False).mean()
+    long_ema = data[column].ewm(span=long_window, adjust=False).mean()
     macd = short_ema - long_ema
-    signal = macd.ewm(span=signal_window, adjust=False).mean()
-    return macd, signal
+    signal_line = macd.ewm(span=signal_window, adjust=False).mean()
+    return macd, signal_line
 
-
-def display_moving_analysis():
+def calculate_moving_averages(data, column='Close', windows=[5, 15, 30]):
     """
-    Display moving averages, RSI, and MACD for stock data.
+    Calculate moving averages for the specified windows without modifying the original dataset.
     """
-    if 'data' in st.session_state:
-        st.title("Technical Indicators: Moving Averages, RSI, and MACD")
+    return {f"SMA_{window}": data[column].rolling(window=window).mean() for window in windows}
 
-        # Load data
-        data = st.session_state['data']
+def moving_indicators():
+    """
+    Display moving averages, RSI, and MACD plots without modifying the original dataset.
+    """
+    st.title("Moving Averages and Indicators")
 
-        # Moving Average
-        st.subheader("Moving Averages")
-        ma_period = st.selectbox("Select Moving Average Period", [5, 15, 30], key="ma_period")
-        data[f"SMA_{ma_period}"] = data['Close'].rolling(window=ma_period).mean()
+    if 'data' not in st.session_state:
+        st.error("No data loaded. Please load data first.")
+        return
 
-        fig_ma = go.Figure()
-        fig_ma.add_trace(go.Scatter(x=data.index, y=data['Close'], mode='lines', name='Close Price'))
-        fig_ma.add_trace(go.Scatter(x=data.index, y=data[f"SMA_{ma_period}"], mode='lines', name=f"{ma_period}-Day SMA"))
-        fig_ma.update_layout(title="Moving Average", xaxis_title="Date", yaxis_title="Price")
-        st.plotly_chart(fig_ma)
+    data = st.session_state['data']
 
-        # RSI
-        st.subheader("Relative Strength Index (RSI)")
-        rsi_period = st.slider("Select RSI Period", 7, 30, 14, key="rsi_period")
-        data['RSI'] = calculate_rsi(data, period=rsi_period)
-        fig_rsi = go.Figure()
-        fig_rsi.add_trace(go.Scatter(x=data.index, y=data['RSI'], mode='lines', name='RSI'))
-        fig_rsi.add_hline(y=70, line_dash="dash", line_color="red", annotation_text="Overbought", annotation_position="top left")
-        fig_rsi.add_hline(y=30, line_dash="dash", line_color="green", annotation_text="Oversold", annotation_position="bottom left")
-        fig_rsi.update_layout(title="Relative Strength Index", xaxis_title="Date", yaxis_title="RSI")
-        st.plotly_chart(fig_rsi)
+    st.header("Moving Averages")
+    windows = st.multiselect("Select Moving Average Periods", [5, 15, 30], default=[5, 15, 30])
+    moving_avg = calculate_moving_averages(data, windows=windows)
 
-        # MACD
-        st.subheader("Moving Average Convergence Divergence (MACD)")
-        macd, signal = calculate_macd(data)
-        data['MACD'] = macd
-        data['Signal'] = signal
-        fig_macd = go.Figure()
-        fig_macd.add_trace(go.Scatter(x=data.index, y=data['MACD'], mode='lines', name='MACD'))
-        fig_macd.add_trace(go.Scatter(x=data.index, y=data['Signal'], mode='lines', name='Signal Line'))
-        fig_macd.update_layout(title="MACD", xaxis_title="Date", yaxis_title="Value")
-        st.plotly_chart(fig_macd)
+    for period, avg in moving_avg.items():
+        st.subheader(f"{period} - Moving Average")
+        st.line_chart(pd.DataFrame({period: avg}, index=data.index))
 
-        # Display Data
-        st.write("Technical Indicator Data")
-        st.dataframe(data[[f"SMA_{ma_period}", 'RSI', 'MACD', 'Signal']].tail())
+    st.header("Relative Strength Index (RSI)")
+    rsi_window = st.slider("Select RSI Window", 10, 30, 14)
+    rsi = calculate_rsi(data, window=rsi_window)
+    st.line_chart(pd.DataFrame({"RSI": rsi}, index=data.index))
+
+    st.header("MACD")
+    short_window = st.slider("Short EMA Window", 5, 20, 12)
+    long_window = st.slider("Long EMA Window", 20, 50, 26)
+    signal_window = st.slider("Signal Line Window", 5, 20, 9)
+    macd, signal_line = calculate_macd(data, short_window=short_window, long_window=long_window, signal_window=signal_window)
+    macd_df = pd.DataFrame({"MACD": macd, "Signal Line": signal_line}, index=data.index)
+    st.line_chart(macd_df)
+
+    st.info("Note: These plots are based on calculated values and do not modify the original dataset.")
