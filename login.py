@@ -20,13 +20,15 @@ def login():
         if authenticate_user(username, password):
             st.session_state.authenticated = True
             st.success("Login successful! Welcome back.")
-            #st.experimental_rerun()  # Refresh the page to show authenticated content
+            st.rerun()  # Refresh the page to show authenticated content
             st.session_state.page = "Load Data"  # Redirect to Load Data after login
         else:
             st.error("Invalid username or password. Please try again.")
 
     # Link to the registration page
-    st.write("Don't have an account? [Register here](#)")
+    #st.write("Don't have an account? [Register here](#)")
+    #url = "./register.py"
+    #st.page_link("./registration.py",label="Don't have an account?")
 
     return st.session_state.get("authenticated", False)
 
@@ -37,4 +39,4 @@ def logout():
     if st.button("Logout"):
         st.session_state.authenticated = False
         st.success("You have been logged out.")
-        st.experimental_rerun()
+        st.rerun()
