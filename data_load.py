@@ -27,7 +27,7 @@ def load_data():
             if data.empty:
                 st.error(f"No data found for {stock_symbol} between {start_date} and {end_date}. Please check the symbol and date range.")
             else:
-                #st.session_state['data'] = data
+                st.session_state['data'] = data
                 st.success(f"Data loaded successfully for {stock_symbol}!")
                 st.dataframe(data.head())  # Display the first few rows of data
         except Exception as e:
