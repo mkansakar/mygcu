@@ -24,8 +24,8 @@ def load_data():
         try:
             stock = yf.Ticker(stock_symbol)
             #data = yf.download(stock_symbol, start=start_date, end=end_date)
-            data = yf.download(stock_symbol, start=start_date, end=end_date)
-
+            
+            data = stock.history(start=start_date, end=end_date)    
             if data.empty:
                 st.error(f"No data found for {stock_symbol} between {start_date} and {end_date}. Please check the symbol and date range.")
             else:
