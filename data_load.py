@@ -22,6 +22,8 @@ def load_data():
     # Fetch the data when the button is clicked
     if st.button("Load Data"):
         try:
+            stock = yf.Ticker(stock_symbol)
+            #data = yf.download(stock_symbol, start=start_date, end=end_date)
             data = yf.download(stock_symbol, start=start_date, end=end_date)
 
             if data.empty:
