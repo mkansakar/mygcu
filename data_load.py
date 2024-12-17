@@ -1,6 +1,7 @@
 import streamlit as st
 import yfinance as yf
 import pandas as pd
+from datetime import datetime, timedelta
 
 def load_data():
     """
@@ -10,9 +11,14 @@ def load_data():
 
     # Input fields for stock symbol and date range
     #stock_symbol = st.text_input("Enter Stock Symbol (e.g., AAPL):").upper()
+    # Set default dates: end_date is current date, start_date is end_date - 364 days
+    end_date_default = datetime.today()
+    start_date_default = end_date_default - timedelta(days=364)
+
+    # Input fields for stock symbol and date range
     stock_symbol = st.text_input("Enter Stock Symbol (e.g., AAPL):", value="AAPL").upper()
-    start_date = st.date_input("Start Date", value=pd.to_datetime("2022-07-01"))
-    end_date = st.date_input("End Date", value=pd.to_datetime("2023-01-01"))
+    start_date = st.date_input("Start Date", value=start_date_default, max_value=end_date_default)
+    end_date = st.date_input("End Date", value=end_date_default, max_value=end_date_default)
 
     # Restrict the date range to 365 days only
     if (end_date - start_date).days > 365:
