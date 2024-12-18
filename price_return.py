@@ -6,7 +6,7 @@ def calculate_price_returns():
     Compute weekly and monthly percentage changes in stock prices.
     """
     if 'data' not in st.session_state or st.session_state['data'] is None:
-        st.error("No data found. Please load data first.")
+        st.error("Please load the data first from the sidebar on the left.")
         return
 
     st.title("Price Returns Analysis")

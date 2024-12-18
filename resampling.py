@@ -6,7 +6,7 @@ def resample_data():
     Resample the stock price data to different time intervals.
     """
     if 'data' not in st.session_state or st.session_state['data'] is None:
-        st.error("No data found. Please load data first.")
+        st.error("Please load the data first from the sidebar on the left.")
         return
 
     st.title("Data Resampling")

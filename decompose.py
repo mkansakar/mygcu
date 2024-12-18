@@ -8,7 +8,7 @@ def decompose_time_series():
     Decompose the time series into trend, seasonal, and residual components.
     """
     if 'data' not in st.session_state or st.session_state['data'] is None:
-        st.error("No data found. Please load data first.")
+        st.error("Please load the data first from the sidebar on the left.")
         return
 
     st.title("Time Series Decomposition")

@@ -64,4 +64,4 @@ def clean_data():
             st.session_state['cleaned_data'] = data
             st.success("Cleaned data saved to session!")
     else:
-        st.error("No data available. Please load data first.")
+        st.error("Please load the data first from the sidebar on the left.")

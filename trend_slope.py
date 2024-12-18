@@ -9,7 +9,7 @@ def compute_trend_slope():
     Compute the slope of trend lines using linear regression on rolling windows.
     """
     if 'data' not in st.session_state or st.session_state['data'] is None:
-        st.error("No data found. Please load data first.")
+        st.error("Please load the data first from the sidebar on the left.")
         return
 
     st.title("Slope of Trend Lines")

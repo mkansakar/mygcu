@@ -38,7 +38,7 @@ def random_forest_model():
     Random Forests for Stock Price Prediction with lagged features, rolling statistics, and trends.
     """
     if 'data' not in st.session_state or st.session_state['data'] is None:
-        st.error("No data found. Please load data first.")
+        st.error("Please load the data first from the sidebar on the left.")
         return
 
     st.title("Random Forest Model with Advanced Features")

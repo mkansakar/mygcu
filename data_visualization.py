@@ -8,7 +8,7 @@ def visualize_data():
     Visualize stock data and display basic statistics.
     """
     if 'data' not in st.session_state:
-        st.error("No data loaded. Please load stock data first.")
+        st.error("Please load the data first from the sidebar on the left.")
         return
 
     data = st.session_state['data']

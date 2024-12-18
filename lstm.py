@@ -29,7 +29,7 @@ def lstm_model():
     LSTM model for stock price prediction with scaling, lagging, and cross-validation.
     """
     if 'data' not in st.session_state or st.session_state['data'] is None:
-        st.error("No data found. Please load data first.")
+        st.error("Please load the data first from the sidebar on the left.")
         return
 
     st.title("LSTM Model for Stock Price Prediction")

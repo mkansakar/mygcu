@@ -82,4 +82,4 @@ def preprocess_data():
             st.success("Preprocessed data saved to session state!")
             st.dataframe(data.head())
     else:
-        st.error("No data available. Please load data first.")
+        st.error("Please load the data first from the sidebar on the left.")

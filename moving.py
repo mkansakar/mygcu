@@ -36,7 +36,7 @@ def moving_indicators():
     st.title("Moving Averages and Indicators")
 
     if 'data' not in st.session_state:
-        st.error("No data loaded. Please load data first.")
+        st.error("Please load the data first from the sidebar on the left.")
         return
 
     data = st.session_state['data']
