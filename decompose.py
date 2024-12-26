@@ -69,7 +69,7 @@ def decompose_time_series():
 
     except ValueError as e:
         st.error(f"Decomposition failed: {str(e)}")
-    with st.expander("What is Time series decomposition?"):
+    with st.expander("What is Time series Decomposition?"):
         st.write("""
             Time series decomposition in stock price forecasting is a method of breaking down a time series into its underlying components to better understand its structure and behavior.\n
             Trend represents the overall direction of stock prices over a longer period, such as an upward or downward trajectory. It helps investors identify long-term growth or decline, ignoring short-term fluctuations.\n

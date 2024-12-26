@@ -90,7 +90,7 @@ def display_volatility_indicators():
     fig_std.add_trace(go.Scatter(x=data.index, y=rolling_std, mode='lines', name='Standard Deviation', line=dict(color='blue')))
     fig_std.update_layout(title=f"Standard Deviation - {window_std} Day Window", xaxis_title="Date", yaxis_title="Standard Deviation", template="plotly_white")
     st.plotly_chart(fig_std)
-    with st.expander("What is tandard Deviation of Prices?"):
+    with st.expander("What is Standard Deviation of Prices?"):
         st.write("""
         Standard deviation in stock price forecasting is a statistical measure that quantifies the amount of variation or dispersion of stock price data over a specific period.\n
         Low Standard Deviation: Indicates that stock prices are closely clustered around the mean, suggesting low volatility. Implies that the stock's price is relatively stable.\n 

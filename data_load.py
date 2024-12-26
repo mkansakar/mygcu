@@ -37,7 +37,7 @@ def load_data():
             else:
                 st.session_state['data'] = data
                 st.success(f"Data loaded successfully for {stock_symbol}!")
-                st.dataframe(data.head())  # Display the first few rows of data
+                st.dataframe(data.tail())  # Display the first few rows of data
         except Exception as e:
             st.error(f"An error occurred while fetching the data: {str(e)}")
     with st.expander("Loading Stock data:"):
