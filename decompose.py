@@ -53,19 +53,26 @@ def decompose_time_series():
         }
 
         # Display components as dataframes
-        st.subheader("Decomposed Components as DataFrame")
-        trend_df = decomposition.trend.dropna().to_frame(name="Trend")
-        seasonal_df = decomposition.seasonal.dropna().to_frame(name="Seasonal")
-        residual_df = decomposition.resid.dropna().to_frame(name="Residual")
+        #st.subheader("Decomposed Components as DataFrame")
+        #trend_df = decomposition.trend.dropna().to_frame(name="Trend")
+        #seasonal_df = decomposition.seasonal.dropna().to_frame(name="Seasonal")
+        #residual_df = decomposition.resid.dropna().to_frame(name="Residual")
 
-        st.write("Trend Component")
-        st.dataframe(trend_df)
+        #st.write("Trend Component")
+        #st.dataframe(trend_df)
 
-        st.write("Seasonal Component")
-        st.dataframe(seasonal_df)
+        #st.write("Seasonal Component")
+        #st.dataframe(seasonal_df)
 
-        st.write("Residual Component")
-        st.dataframe(residual_df)
+        #st.write("Residual Component")
+        #st.dataframe(residual_df)
 
     except ValueError as e:
         st.error(f"Decomposition failed: {str(e)}")
+    with st.expander("What is Time series decomposition?"):
+        st.write("""
+            Time series decomposition in stock price forecasting is a method of breaking down a time series into its underlying components to better understand its structure and behavior.\n
+            Trend represents the overall direction of stock prices over a longer period, such as an upward or downward trajectory. It helps investors identify long-term growth or decline, ignoring short-term fluctuations.\n
+            Seasonality captures recurring patterns or cycles within specific periods, such as weekly, monthly, or yearly behaviors. For example, retail stocks might show higher prices during the holiday season due to increased sales activity.\n
+            Residuals or noise represent random, unpredictable fluctuations in stock prices after accounting for the trend and seasonality. These variations are often caused by unexpected market events or speculative behavior and highlight the inherent unpredictability of stock prices.\n          
+        """)  

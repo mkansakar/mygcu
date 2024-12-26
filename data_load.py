@@ -40,3 +40,8 @@ def load_data():
                 st.dataframe(data.head())  # Display the first few rows of data
         except Exception as e:
             st.error(f"An error occurred while fetching the data: {str(e)}")
+    with st.expander("Loading Stock data:"):
+        st.write("""
+            Choose ticker name of your choice. For example APPL for Apple or NVDA for NVidia or MSFT for Microsoft.\n
+            Choose start date and end date; make sure max days cannot exceed 365 days.
+        """)  

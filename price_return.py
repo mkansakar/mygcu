@@ -26,8 +26,8 @@ def calculate_price_returns():
         weekly_returns.dropna(inplace=True)
 
         # Display results
-        st.write("Weekly percentage changes (first few rows):")
-        st.write(weekly_returns.head())
+        st.write("Weekly percentage changes:")
+        #st.write(weekly_returns.tail())
         st.line_chart(weekly_returns, use_container_width=True)
 
         # Store computed returns in session state
@@ -40,9 +40,17 @@ def calculate_price_returns():
         monthly_returns.dropna(inplace=True)
 
         # Display results
-        st.write("Monthly percentage changes (first few rows):")
-        st.write(monthly_returns.head())
+        st.write("Monthly percentage changes:")
+        #st.write(monthly_returns.tail())
         st.line_chart(monthly_returns, use_container_width=True)
 
         # Store computed returns in session state
         st.session_state['monthly_returns'] = monthly_returns
+    with st.expander("What is Price Return?"):
+        st.write("""
+            Price return analysis evaluates the percentage change in a stock’s price over a specific period, offering insights into its performance and potential trends.\n
+            Positive Return: A positive percentage return indicates that the stock’s price has increased during the analyzed timeframe.\n
+                 A 5% weekly return means the stock's price grew by 5% over the past week.
+            Negative Return: A negative percentage return suggests that the stock’s price has decreased. \n
+                 A -3% daily return indicates a 3% drop in the stock's price from the previous day.
+        """)  
