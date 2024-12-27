@@ -11,6 +11,7 @@ def visualize_data():
         return
     
     data = st.session_state['data']
+    #st.write(data.tail())
 
     st.title("Candlestick Chart")
     st.markdown(f"Stock: {st.session_state['symbol']}")

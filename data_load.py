@@ -26,13 +26,17 @@ def load_data():
     # Input for end date below the same row
     with col3:
         end_date = st.date_input("End Date", value=end_date_default, max_value=end_date_default)
+
     # Restrict the date range to 365 days only
     if (end_date - start_date).days > 365:
         st.warning("The date range cannot exceed 365 days. Please adjust the dates.")
         return
+    
+    # Fetch the data when the button is clicked
     if st.button("Load Data"):
         try:
-            data = yf.download(stock_symbol, start=start_date, end=end_date)
+            stock = yf.Ticker(stock_symbol)
+            data = stock.history(start=start_date, end=end_date)
             if not data.empty:
                 st.success(f"Data successfully downloaded for {stock_symbol} from {start_date} to {end_date}.")
                 st.write(data.tail())  # Display the first few rows
@@ -45,7 +49,7 @@ def load_data():
 
 
 
-    with st.expander("**DISCLAIMER: Please read before proceeding.**", expanded=True):
+    with st.expander("**DISCLAIMER: Please read before proceeding.**"):
         st.write("""        
         The Stock Price Forecast Data Product is intended for informational and educational purposes only. It provides analytical tools and forecasts based on historical stock data and mathematical models. The following points should be carefully considered by all users:
 
