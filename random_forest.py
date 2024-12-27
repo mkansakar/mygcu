@@ -42,7 +42,7 @@ def random_forest_model():
         return
 
     st.title("Random Forest Model with Advanced Features")
-
+    st.markdown(f"Stock: {st.session_state['symbol']}")
     # Load the data
     data = st.session_state['data']
     column = st.selectbox("Select the target column for prediction", data.columns, index=data.columns.get_loc("Close"))

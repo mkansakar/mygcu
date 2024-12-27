@@ -80,6 +80,6 @@ def preprocess_data():
         if st.button("Save Preprocessed Data"):
             st.session_state['preprocessed_data'] = data
             st.success("Preprocessed data saved to session state!")
-            st.dataframe(data.head())
+            st.dataframe(data.tail())
     else:
         st.error("Please load the data first from the sidebar on the left.")

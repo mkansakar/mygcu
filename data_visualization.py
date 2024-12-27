@@ -9,11 +9,11 @@ def visualize_data():
     if 'data' not in st.session_state:
         st.error("Please load the data first from the sidebar on the left.")
         return
-
+    
     data = st.session_state['data']
 
     st.title("Candlestick Chart")
-
+    st.markdown(f"Stock: {st.session_state['symbol']}")
     # Ensure the required columns are present for the candlestick chart
     if all(col in data.columns for col in ['Open', 'High', 'Low', 'Close']):
         fig = go.Figure(

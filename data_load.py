@@ -5,43 +5,55 @@ from datetime import datetime, timedelta
 
 def load_data():
     """
-    Load stock data for the selected symbol and date range.
+    Load stock data from Yahoo Finance.
     """
     st.title("Load Stock Price Data")
 
-    # Input fields for stock symbol and date range
-    #stock_symbol = st.text_input("Enter Stock Symbol (e.g., AAPL):").upper()
-    # Set default dates: end_date is current date, start_date is end_date - 364 days
     end_date_default = datetime.today()
     start_date_default = end_date_default - timedelta(days=364)
 
-    # Input fields for stock symbol and date range
-    stock_symbol = st.text_input("Enter Stock Symbol (e.g., AAPL):", value="AAPL").upper()
-    start_date = st.date_input("Start Date", value=start_date_default, max_value=end_date_default)
-    end_date = st.date_input("End Date", value=end_date_default, max_value=end_date_default)
+    # Use st.columns to place inputs side by side
+    col1, col2, col3 = st.columns(3)
 
+    # Input for stock symbol
+    with col1:
+        stock_symbol = st.text_input("Enter ticker (e.g., AAPL):", value="AAPL").upper()
+
+    # Input for start date
+    with col2:
+        start_date = st.date_input("Start Date", value=start_date_default, max_value=end_date_default)
+
+    # Input for end date below the same row
+    with col3:
+        end_date = st.date_input("End Date", value=end_date_default, max_value=end_date_default)
     # Restrict the date range to 365 days only
     if (end_date - start_date).days > 365:
         st.warning("The date range cannot exceed 365 days. Please adjust the dates.")
         return
-
-    # Fetch the data when the button is clicked
     if st.button("Load Data"):
         try:
-            stock = yf.Ticker(stock_symbol)
-            #data = yf.download(stock_symbol, start=start_date, end=end_date)
-            
-            data = stock.history(start=start_date, end=end_date)    
-            if data.empty:
-                st.error(f"No data found for {stock_symbol} between {start_date} and {end_date}. Please check the symbol and date range.")
+            data = yf.download(stock_symbol, start=start_date, end=end_date)
+            if not data.empty:
+                st.success(f"Data successfully downloaded for {stock_symbol} from {start_date} to {end_date}.")
+                st.write(data.tail())  # Display the first few rows
+                st.session_state['data'] = data  # Store data in session state
+                st.session_state['symbol'] = stock_symbol
             else:
-                st.session_state['data'] = data
-                st.success(f"Data loaded successfully for {stock_symbol}!")
-                st.dataframe(data.tail())  # Display the first few rows of data
+                st.warning(f"No data found for {stock_symbol} in the specified date range.")
         except Exception as e:
-            st.error(f"An error occurred while fetching the data: {str(e)}")
-    with st.expander("Loading Stock data:"):
-        st.write("""
-            Choose ticker name of your choice. For example APPL for Apple or NVDA for NVidia or MSFT for Microsoft.\n
-            Choose start date and end date; make sure max days cannot exceed 365 days.
+            st.error(f"Error downloading data: {e}")
+
+
+
+    with st.expander("**DISCLAIMER: Please read before proceeding.**", expanded=True):
+        st.write("""        
+        The Stock Price Forecast Data Product is intended for informational and educational purposes only. It provides analytical tools and forecasts based on historical stock data and mathematical models. The following points should be carefully considered by all users:
+
+        1. Not Financial Advice: The forecasts, analyses, and insights provided by this product do not constitute financial, investment, or trading advice. Always consult a certified financial advisor before making any investment decisions.
+        2. Market Risks: Stock markets are inherently volatile and unpredictable. Past performance is not indicative of future results. Users should be aware of the risks associated with trading and investing.
+        3. Accuracy and Limitations: While we strive to provide accurate and reliable forecasts, no guarantee is made regarding the accuracy, completeness, or timeliness of the information presented. The models used are subject to limitations and assumptions, which may not account for all market variables or events.
+        4. User Responsibility: The use of this product is at the user's own risk. The creators and developers of this product are not liable for any financial losses or damages arising from the use of the information provided.
+        5. No Warranty: This product is provided "as is," without any warranties or guarantees of any kind, either expressed or implied.
+
+        By using this product, you acknowledge and agree to the terms of this disclaimer. Always perform your due diligence and exercise caution when making financial decisions.
         """)  

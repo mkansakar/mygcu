@@ -24,6 +24,7 @@ def decompose_time_series():
 
     # Select decomposition model
     st.subheader("Decomposition Options")
+    st.markdown(f"Stock: {st.session_state['symbol']}")
     model = st.radio("Select Decomposition Model", ["Additive", "Multiplicative"], index=0)
 
     # Perform decomposition

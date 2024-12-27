@@ -11,7 +11,7 @@ def sarima_forecast(data, column="Close", seasonal_order=(1, 1, 1, 12), forecast
     """
     try:
         st.subheader("SARIMA Forecasting")
-
+        st.markdown(f"Stock: {st.session_state['symbol']}")
         # Select column to forecast
         st.write(f"Training SARIMA model on column: **{column}**")
         ts_data = data[column].dropna()

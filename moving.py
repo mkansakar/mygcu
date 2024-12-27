@@ -35,7 +35,7 @@ def moving_indicators():
     Display combined moving averages, RSI, and MACD plots without modifying the original dataset.
     """
     st.title("Moving Averages and Indicators")
-
+    st.markdown(f"Stock: {st.session_state['symbol']}")
     if 'data' not in st.session_state:
         st.error("Please load the data first from the sidebar on the left.")
         return

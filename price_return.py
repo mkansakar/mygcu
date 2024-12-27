@@ -10,7 +10,7 @@ def calculate_price_returns():
         return
 
     st.title("Price Returns Analysis")
-
+    st.markdown(f"Stock: {st.session_state['symbol']}")
     # Select column for price returns calculation
     data = st.session_state['data']
     column = st.selectbox("Select a column to compute percentage changes", data.columns, index=data.columns.get_loc("Close"))

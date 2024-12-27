@@ -38,7 +38,7 @@ def feedback_form():
     # Feedback form fields
     username = st.text_input("Your Name:", placeholder="Enter your name")
     rating = st.radio("Rate your experience (1 - Poor, 5 - Excellent):", 
-                      options=[1, 2, 3, 4, 5], horizontal=True)
+                      options=[1, 2, 3, 4, 5], index=4, horizontal=True)
     comments = st.text_area("Additional Comments:", placeholder="Share your thoughts...")
 
     if st.button("Submit Feedback"):

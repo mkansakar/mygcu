@@ -9,7 +9,7 @@ def spectral_analysis():
     Perform spectral analysis on stock prices to identify dominant frequencies.
     """
     st.title("Spectral Analysis of Stock Prices")
-
+    st.markdown(f"Stock: {st.session_state['symbol']}")
     if 'data' not in st.session_state:
         st.error("No data loaded. Please load the data first.")
         return
@@ -22,6 +22,7 @@ def spectral_analysis():
 
     # Compute the power spectral density
     st.subheader("Frequency Domain Analysis")
+    st.markdown(f"Stock: {st.session_state['symbol']}")
     freq, power = periodogram(data[column].dropna(), scaling='spectrum')
 
     # Create a DataFrame for visualization

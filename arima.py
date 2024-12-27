@@ -26,7 +26,7 @@ def arima_model():
         return
 
     st.title("ARIMA Model for Stock Price Prediction")
-
+    st.markdown(f"Stock: {st.session_state['symbol']}")
     # Load the data
     data = st.session_state['data']
     column = st.selectbox("Select a column for ARIMA modeling", data.columns, index=data.columns.get_loc("Close"))

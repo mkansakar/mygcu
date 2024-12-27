@@ -22,7 +22,7 @@ def apply_transformations():
         return
 
     st.title("Data Transformations")
-
+    st.markdown(f"Stock: {st.session_state['symbol']}")
     # Select column for transformation
     data = st.session_state['data']
     column = st.selectbox("Select a column for transformation", data.columns, index=data.columns.get_loc("Close"))

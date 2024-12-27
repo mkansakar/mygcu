@@ -33,7 +33,7 @@ def display_volatility_indicators():
         return
 
     st.title("Volatility Indicators")
-
+    st.markdown(f"Stock: {st.session_state['symbol']}")
     # Select column and window size
     data = st.session_state['data']
     st.subheader("Bollinger Bands")
