@@ -8,11 +8,13 @@ def spectral_analysis():
     """
     Perform spectral analysis on stock prices to identify dominant frequencies.
     """
+
+    if 'data' not in st.session_state:
+        st.error("Please load the data first from the sidebar on the left.")
+        return
+
     st.title("Spectral Analysis of Stock Prices")
     st.markdown(f"Stock: {st.session_state['symbol']}")
-    if 'data' not in st.session_state:
-        st.error("No data loaded. Please load the data first.")
-        return
 
     # Load the data
     data = st.session_state['data']
