@@ -11,9 +11,10 @@ def visualize_data():
         return
     
     data = st.session_state['data']
-
+    st.write(data.tail())
+    
     st.title("Candlestick Chart")
-    st.markdown(f"Stock: {st.session_state['symbol']}")
+    #st.markdown(f"Stock: {st.session_state['symbol']}")
     # Ensure the required columns are present for the candlestick chart
     if all(col in data.columns for col in ['Open', 'High', 'Low', 'Close']):
         fig = go.Figure(
