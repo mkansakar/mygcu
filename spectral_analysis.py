@@ -24,8 +24,19 @@ def spectral_analysis():
 
     # Compute the power spectral density
     st.subheader("Frequency Domain Analysis")
-    st.markdown(f"Stock: {st.session_state['symbol']}")
-    freq, power = periodogram(data[column].dropna(), scaling='spectrum')
+    #detrend = st.checkbox("Apply Detrending")
+    #normalize = st.checkbox("Normalize Data")   
+
+    #data = data[column].dropna()
+    #data = data.to_numpy()
+
+    # if detrend:
+    #     data = data - data.mean()
+    # if normalize:
+    #     data = (data - data.min()) / (data.max() - data.min())
+
+
+    freq, power = periodogram(data, scaling='spectrum')
 
     # Create a DataFrame for visualization
     spectral_df = pd.DataFrame({"Frequency": freq, "Power": power})

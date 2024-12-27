@@ -19,7 +19,7 @@ from random_forest import random_forest_model
 #from lstm import lstm_model
 from feedback import feedback_form
 #from sarima_model import sarima_model
-from spectral_analysis import spectral_analysis 
+#from spectral_analysis import spectral_analysis 
 
 
 # Set the page title and favicon
@@ -92,7 +92,7 @@ def main():
         st.sidebar.button("Price Returns", on_click=set_page, args=("Price Returns",), key="price_returns_button")
         st.sidebar.button("Slope of Trend Lines", on_click=set_page, args=("Trend Slope",), key="trend_slope_button")
         st.sidebar.button("Volatility Indicators", on_click=set_page, args=("Volatility Indicators",), key="volatility_button")
-        st.sidebar.button("Spectral Analysis", on_click=set_page, args=("Spectral Analysis",), key="spectral_analysis_button")
+        #st.sidebar.button("Spectral Analysis", on_click=set_page, args=("Spectral Analysis",), key="spectral_analysis_button")
         st.sidebar.button("Time Series Decomposition", on_click=set_page, args=("Decomposition",), key="decomposition_button")
         st.sidebar.button("Preprocess Data", on_click=set_page, args=("Preprocess Data",), key="preprocess_data_button")
         #st.sidebar.button("Check Stationarity", on_click=set_page, args=("Check Stationarity",), key="check_stationarity_button")
@@ -120,8 +120,8 @@ def main():
             display_volatility_indicators()
         elif st.session_state.page == "Decomposition":
             decompose_time_series()
-        elif st.session_state.page == "Spectral Analysis":
-            spectral_analysis()
+        #elif st.session_state.page == "Spectral Analysis":
+        #    spectral_analysis()
         elif st.session_state.page == "Preprocess Data":
             preprocess_data()
         #elif st.session_state.page == "Check Stationarity":

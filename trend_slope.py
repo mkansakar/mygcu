@@ -65,9 +65,11 @@ def compute_trend_slope():
     st.session_state['trend_slopes'] = slope_df
     with st.expander("What is Trend Slope?"):
             st.write("""
-                A moving average in stock prices is a statistical measure used to analyze and smooth out price data by creating a continuously updated average price over a specific period.\n
-                Bullish Signal: When the short-term average (5-day) crosses above the medium or long-term average (15-day or 30-day), it indicates rising momentum and a potential buy opportunity.\n
-                Bearish Signal: When the short-term average crosses below the longer averages, it signals weakening momentum and a potential sell opportunity.
+                The Slope of Trend Lines is a quantitative measure used in stock price forecasting to evaluate the direction and rate of change of a stock's price over a specific time period.\n
+                It is derived from the linear regression line fitted to a series of stock prices or a particular stock-related metric. \n
+                Identify Trends: The slope clearly indicates whether the stock is trending upward, downward, or remaining flat.\n
+                Measure Momentum: The steepness of the slope reflects the strength of the trend; a steep slope indicates strong momentum, while a flatter slope suggests weaker movement.\n
+                Generate Trading Signals: Positive slopes may signal buying opportunities, while negative slopes may indicate a good time to sell or short the stock.
             """)  
     # Display slope DataFrame
     #st.subheader("Trend Slope Data")
