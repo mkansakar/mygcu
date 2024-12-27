@@ -18,7 +18,7 @@ from arima import arima_model
 from random_forest import random_forest_model
 #from lstm import lstm_model
 from feedback import feedback_form
-from sarima_model import sarima_model
+#from sarima_model import sarima_model
 from spectral_analysis import spectral_analysis 
 
 
@@ -93,7 +93,7 @@ def main():
         #st.sidebar.button("Transform Data", on_click=set_page, args=("Transform Data",), key="transform_data_button")
         st.sidebar.button("ARIMA Model", on_click=set_page, args=("ARIMA Model",), key="arima_button")
         st.sidebar.button("Random Forest Model", on_click=set_page, args=("Random Forest",), key="random_forest_button")
-        st.sidebar.button("SARIMA Model", on_click=set_page, args=("SARIMA Model",), key="sarima_button")
+        #st.sidebar.button("SARIMA Model", on_click=set_page, args=("SARIMA Model",), key="sarima_button")
         #st.sidebar.button("LSTM Model", on_click=set_page, args=("LSTM",), key="lstm_button")
         st.sidebar.button("Contact Us", on_click=set_page, args=("Contact Us",), key="contact_us_button")
         st.sidebar.button("Feedback", on_click=set_page, args=("Feedback",), key="feedback_button")
@@ -128,8 +128,8 @@ def main():
             random_forest_model()
         #elif st.session_state.page == "LSTM":
         #    lstm_model()
-        elif st.session_state.page == "SARIMA Model":
-            sarima_model()
+        #elif st.session_state.page == "SARIMA Model":
+        #    sarima_model()
         elif st.session_state.page == "Spectral Analysis":
             spectral_analysis()
         elif st.session_state.page == "Contact Us":
