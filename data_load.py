@@ -41,7 +41,7 @@ def load_data():
                 st.success(f"Data successfully downloaded for {stock_symbol} from {start_date} to {end_date}.")
                 st.write(data.tail())  # Display the first few rows
                 st.session_state['data'] = data  # Store data in session state
-                #st.session_state['symbol'] = stock_symbol
+                st.session_state['symbol'] = stock_symbol
             else:
                 st.warning(f"No data found for {stock_symbol} in the specified date range.")
         except Exception as e:
