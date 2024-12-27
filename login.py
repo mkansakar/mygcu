@@ -6,7 +6,7 @@ def login():
     Login page for user authentication.
     """
     st.title("Login")
-    st.write("Welcome to the Stock Price Prediction Data Product! Please log in to continue.")
+    st.write("Welcome to the Trade Bot! Please log in to continue.")
 
     # Initialize the database
     initialize_database()

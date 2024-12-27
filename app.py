@@ -22,6 +22,12 @@ from feedback import feedback_form
 from spectral_analysis import spectral_analysis 
 
 
+# Set the page title and favicon
+st.set_page_config(
+    page_title="Trade Bot",  # Title that appears on the browser tab
+    page_icon="📈",  # Emoji or a path to a favicon image
+)
+
 # Initialize session state variables
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
