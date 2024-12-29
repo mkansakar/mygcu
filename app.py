@@ -26,7 +26,7 @@ from xgboost_model import xgboost_prediction
 
 # Set the page title and favicon
 st.set_page_config(
-    page_title="Trade Bot",  # Title that appears on the browser tab
+    page_title="Devel Bot",  # Title that appears on the browser tab
     page_icon="📈",  # Emoji or a path to a favicon image
 )
 

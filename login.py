@@ -1,5 +1,5 @@
 import streamlit as st
-from database1 import authenticate_user, initialize_database
+from database import authenticate_user, initialize_database
 
 def login():
     """
