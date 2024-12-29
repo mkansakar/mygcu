@@ -2,15 +2,16 @@ import streamlit as st
 import yfinance as yf
 import pandas as pd
 from datetime import datetime, timedelta
+import plotly.express as px
 
 def load_data():
     """
     Load stock data from Yahoo Finance.
     """
     st.title("Load Stock Price Data")
-
+    #st.markdown("<h2 style='text-align: center; font-size: 20px;'>Load Stock Price Data</h2>", unsafe_allow_html=True)
     end_date_default = datetime.today()
-    start_date_default = end_date_default - timedelta(days=364)
+    start_date_default = end_date_default - timedelta(days=729)
 
     # Use st.columns to place inputs side by side
     col1, col2, col3 = st.columns(3)
@@ -28,7 +29,7 @@ def load_data():
         end_date = st.date_input("End Date", value=end_date_default, max_value=end_date_default)
 
     # Restrict the date range to 365 days only
-    if (end_date - start_date).days > 365:
+    if (end_date - start_date).days > 730:
         st.warning("The date range cannot exceed 365 days. Please adjust the dates.")
         return
     
@@ -36,12 +37,18 @@ def load_data():
     if st.button("Load Data"):
         try:
             stock = yf.Ticker(stock_symbol)
+            full_name = stock.info.get("longName", "N/A")
             data = stock.history(start=start_date, end=end_date)
             if not data.empty:
-                st.success(f"Data successfully downloaded for {stock_symbol} from {start_date} to {end_date}.")
-                st.write(data.tail())  # Display the first few rows
+                #st.success(f"Data successfully loaded for {stock_symbol} from {start_date} to {end_date}.")
+                #st.subheader(f"{stock_symbol} Closing Price")
+                fig = px.line(data, x=data.index, y="Close", title=f"Closing Price Over Time - {full_name}")
+                fig.update_xaxes(title="Date")
+                fig.update_yaxes(title="Price")
+                st.plotly_chart(fig)                
+                #st.write(data.tail())  # Display the first few rows
                 st.session_state['data'] = data  # Store data in session state
-                st.session_state['symbol'] = stock_symbol
+                st.session_state['symbol'] = full_name
             else:
                 st.warning(f"No data found for {stock_symbol} in the specified date range.")
         except Exception as e:

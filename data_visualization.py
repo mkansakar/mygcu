@@ -11,32 +11,45 @@ def visualize_data():
         return
     
     data = st.session_state['data']
-    #st.write(data.tail())
-
-    st.title("Candlestick Chart")
+    
+    # Ensure the data has at least 30 days of records
+    if len(data) < 30:
+        st.error("Not enough data to display a candlestick chart for the last 30 days.")
+        return
+    
+    # Slice the last 30 days of data
+    last_30_days = data.tail(30)    
+    
+    st.title("Candlestick Chart (Last 30 Days)")
     st.markdown(f"Stock: {st.session_state['symbol']}")
+
     # Ensure the required columns are present for the candlestick chart
     if all(col in data.columns for col in ['Open', 'High', 'Low', 'Close']):
+        #st.title("Candlestick Chart (Last 30 Days)")
+
         fig = go.Figure(
             data=[
                 go.Candlestick(
-                    x=data.index,
-                    open=data['Open'],
-                    high=data['High'],
-                    low=data['Low'],
-                    close=data['Close']
+                    x=last_30_days.index,
+                    open=last_30_days['Open'],
+                    high=last_30_days['High'],
+                    low=last_30_days['Low'],
+                    close=last_30_days['Close']
                 )
             ]
         )
+
         fig.update_layout(
-            title="Candlestick Chart",
+            #title="Candlestick Chart (Last 30 Days)",
             xaxis_title="Date",
             yaxis_title="Price",
             template="plotly_white"
         )
-        st.plotly_chart(fig, use_container_width=True)
+
+        st.plotly_chart(fig)
     else:
-        st.error("The dataset does not contain required columns for a Candlestick Chart.")
+        st.error("The dataset does not contain the required columns for a candlestick chart.")
+
 
     # Add a link for basic information about candlestick charts
     with st.expander("What is a Candlestick Chart?"):
