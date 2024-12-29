@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from sklearn.model_selection import train_test_split, GridSearchCV, cross_val_score
-from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report
 from sklearn.preprocessing import StandardScaler, PolynomialFeatures
 
@@ -46,16 +46,16 @@ def calculate_cmf(data, high='High', low='Low', close='Close', volume='Volume', 
     cmf = money_flow_volume.rolling(window=window).sum() / data[volume].rolling(window=window).sum()
     return cmf
 
-def logistic_regression():
+def random_forest_classification():
     """
-    Logistic Regression with Feature Engineering for Price Movement Prediction.
+    Random Forest for Stock Price Movement Prediction.
     """
 
     if 'data' not in st.session_state or st.session_state['data'] is None:
         st.error("Please load the data first from the sidebar on the left")
         return
 
-    st.title("Logistic Regression Price Movement")
+    st.title("Random Forest Price Movement")
     st.markdown(f"Stock: {st.session_state['symbol']}")
 
     data = st.session_state['data'].copy()
@@ -89,25 +89,17 @@ def logistic_regression():
     features = data[['Close', 'SMA_10', 'SMA_20', 'RSI', 'MACD', 'Signal_Line', 'Momentum', 'Daily_Return', 'ATR', 'CMF']]
     target = data['Target']
 
-    # Create interaction terms between features
-    poly = PolynomialFeatures(interaction_only=True, include_bias=False)
-    interaction_features = poly.fit_transform(features)
-
-    # Update feature names for interaction terms
-    feature_names = poly.get_feature_names_out(features.columns)
-    features = pd.DataFrame(interaction_features, columns=feature_names, index=features.index)
-
     # Split data into training and testing sets
     X_train, X_test, y_train, y_test = train_test_split(features, target, test_size=0.2, random_state=42)
 
-    # Train Logistic Regression model with cross-validation
-    model = LogisticRegression()
+    # Train Random Forest model
+    model = RandomForestClassifier(n_estimators=100, random_state=42)
+    model.fit(X_train, y_train)
+
+    # Cross-validation scores
     cross_val_scores = cross_val_score(model, X_train, y_train, cv=5)
     st.write(f"Cross-Validation Accuracy Scores: {cross_val_scores}")
     st.write(f"Mean Cross-Validation Accuracy: {cross_val_scores.mean() * 100:.2f}%")
-
-    # Fit the model on the full training data
-    model.fit(X_train, y_train)
 
     # Make predictions
     predictions = model.predict(X_test)
@@ -115,6 +107,8 @@ def logistic_regression():
     # Evaluate model
     accuracy = accuracy_score(y_test, predictions)
     st.write(f"Model Accuracy: {accuracy * 100:.2f}%")
+    st.text("Classification Report:")
+    st.text(classification_report(y_test, predictions))
 
     # Predict next day's movement
     st.subheader("Next Day Prediction")

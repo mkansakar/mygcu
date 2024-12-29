@@ -55,5 +55,5 @@ def xgboost_prediction():
         st.subheader("Next Day Prediction")
         last_row = X.iloc[-1:]  # Ensure it has feature names
         prediction = model.predict(last_row)
-        st.write("Predicted Movement: Up" if prediction[0] == 1 else "Predicted Movement: Down")
+        st.write("Predicted Movement: **Up**" if prediction[0] == 1 else "Predicted Movement: **Down**")
 

@@ -21,8 +21,11 @@ from feedback import feedback_form
 #from sarima_model import sarima_model
 #from spectral_analysis import spectral_analysis 
 from logistic_regression import logistic_regression
-from cnn_model import cnn_model
-from xgboost_model import xgboost_prediction
+#from cnn_model import cnn_model
+#from xgboost_model import xgboost_prediction
+from svm_model import svm_model
+from random_forest_classification import random_forest_classification
+from stochastic_analysis import stochastic_analysis
 
 # Set the page title and favicon
 st.set_page_config(
@@ -99,16 +102,19 @@ def main():
         #st.sidebar.button("Preprocess Data", on_click=set_page, args=("Preprocess Data",), key="preprocess_data_button")
         #st.sidebar.button("Check Stationarity", on_click=set_page, args=("Check Stationarity",), key="check_stationarity_button")
         #st.sidebar.button("Transform Data", on_click=set_page, args=("Transform Data",), key="transform_data_button")
-        
+        st.sidebar.button("Stochastic Analysis", on_click=set_page, args=("Stochastic Analysis",), key="stochastic_analysis_button")
+
         #========================Advanced features for admin only=======================
         if st.session_state.role == "admin":
             st.sidebar.button("ARIMA Model", on_click=set_page, args=("ARIMA Model",), key="arima_button")
-            st.sidebar.button("Random Forest Model", on_click=set_page, args=("Random Forest",), key="random_forest_button")
+            #st.sidebar.button("Random Forest Model", on_click=set_page, args=("Random Forest",), key="random_forest_button")
             #st.sidebar.button("SARIMA Model", on_click=set_page, args=("SARIMA Model",), key="sarima_button")
             #st.sidebar.button("LSTM Model", on_click=set_page, args=("LSTM",), key="lstm_button")
             st.sidebar.button("Logistic Regression Model", on_click=set_page, args=("Logistic Regression",), key="logistic_regression_button")
-            st.sidebar.button("CNN Model", on_click=set_page, args=("CNN",), key="cnn_button")
-            st.sidebar.button("XGBoost Prediction", on_click=set_page, args=("XGBoost",), key="xgboost_button")
+            #st.sidebar.button("CNN Model", on_click=set_page, args=("CNN",), key="cnn_button")
+            #st.sidebar.button("XGBoost Model", on_click=set_page, args=("XGBoost",), key="xgboost_button")
+            st.sidebar.button("SVM Model", on_click=set_page, args=("SVM",), key="svm_button")
+            st.sidebar.button("Random Forest Model", on_click=set_page, args=("Random Forest",), key="random_forest_button")
         #================================================================================
 
         st.sidebar.button("Contact Us", on_click=set_page, args=("Contact Us",), key="contact_us_button")
@@ -130,6 +136,8 @@ def main():
             display_volatility_indicators()
         elif st.session_state.page == "Decomposition":
             decompose_time_series()
+        elif st.session_state.page == "Stochastic Analysis":
+            stochastic_analysis()
         #elif st.session_state.page == "Spectral Analysis":
         #    spectral_analysis()
         #elif st.session_state.page == "Preprocess Data":
@@ -141,19 +149,22 @@ def main():
         elif st.session_state.page == "ARIMA Model":
             arima_model()
         elif st.session_state.page == "Random Forest":
-            random_forest_model()
+            #random_forest_model()
+            random_forest_classification()
         elif st.session_state.page == "Logistic Regression":
             logistic_regression()
-        elif st.session_state.page == "CNN":
-            cnn_model()
-        elif st.session_state.page == "XGBoost":
-            xgboost_prediction()
+        # elif st.session_state.page == "CNN":
+        #     cnn_model()
+        # elif st.session_state.page == "XGBoost":
+        #     xgboost_prediction()
         #elif st.session_state.page == "LSTM":
         #    lstm_model()
         #elif st.session_state.page == "SARIMA Model":
         #    sarima_model()
         #elif st.session_state.page == "Spectral Analysis":
         #    spectral_analysis()
+        elif st.session_state.page == "SVM":
+            svm_model()
         elif st.session_state.page == "Contact Us":
             contact_us()
         elif st.session_state.page == "Feedback":
