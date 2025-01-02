@@ -65,6 +65,21 @@ def fundamentals():
             # else:
             #     st.write("Income statement data not available.")
 
+            with st.expander("What is Company Statistics?"):
+                st.write("""
+                EPS represents a company's profitability on a per-share basis. It shows how much profit is allocated to each outstanding share of common stock. A higher EPS generally indicates greater profitability.\n
+
+                Market Cap measures the total value of a company's outstanding shares in the stock market. Larger companies tend to be more stable, while smaller ones may offer higher growth potential but carry more risk..\
+
+                The PE Ratio compares a company's stock price to its earnings per share, reflecting how much investors are willing to pay for each dollar of earnings.\n
+                High PE Ratio: Indicates investors expect higher growth in the future, but it may also signal overvaluation.\n
+                Low PE Ratio: Suggests undervaluation or slow growth expectations.\n
+
+                Dividend Yield represents the annual dividend payout as a percentage of the stock's current price.\n
+                High Dividend Yield: Often attractive to income-focused investors but could indicate a declining stock price or unsustainable dividends.\n
+                Low Dividend Yield: Suggests a focus on growth rather than income. A useful metric for investors seeking regular income.
+                """)
+
             # Cash Flow Statement
             st.header("Cash Flow Statement")
             cashflow = stock.cashflow
@@ -92,7 +107,7 @@ def fundamentals():
         st.write("""
             Company fundamentals refer to the core quantitative and qualitative information about a business that is used to evaluate its overall health, financial performance, and intrinsic value. These fundamentals are essential for making informed investment decisions and are typically divided into financial metrics and business-specific factors.\n
             info: Provides detailed company information, such as market capitalization, PE ratio, dividend yield, etc..\n
-            balance_sheet: Contains the company’s assets, liabilities, and equity.\n
+            balance_sheet: Contains the company's assets, liabilities, and equity.\n
             financials: Displays the income statement including revenue, operating expenses, and net income.\n
             cashflow: Shows cash flow activities including operating, investing, and financing activities.\n
             major_holders: Lists major shareholders.\n
