@@ -1,11 +1,12 @@
 # app.py
 import streamlit as st
 from login import login
-from contact_us import contact_us
+#from contact_us import contact_us
 from registration import register_user
 from data_load import load_data
 from data_visualization import visualize_data
-from price_return import calculate_price_returns
+from fundamentals import fundamentals
+#from price_return import calculate_price_returns
 from moving import moving_indicators
 from trend_slope import compute_trend_slope
 from decompose import decompose_time_series
@@ -64,7 +65,7 @@ def footer():
         }
         </style>
         <div class="footer">
-            <p>© 2024 Trade Bot. All rights reserved.</p>
+            <p>© 2025 Trade Bot. All rights reserved.</p>
         </div>
         """,
         unsafe_allow_html=True
@@ -84,9 +85,10 @@ def main():
 
         st.sidebar.title("Stock Bot Menu")
         st.sidebar.button("Load Stock Data", on_click=set_page, args=("Load Data",), key="load_data_button")
+        st.sidebar.button("Fundamentals", on_click=set_page, args=("Fundamentals",), key="fundamentals_data_button")
         st.sidebar.button("Candlestick", on_click=set_page, args=("Visualize Data",), key="visualize_data_button")
         st.sidebar.button("Moving Analysis", on_click=set_page, args=("Moving Analysis",), key="moving_analysis_button")
-        st.sidebar.button("Price Returns", on_click=set_page, args=("Price Returns",), key="price_returns_button")
+        #st.sidebar.button("Price Returns", on_click=set_page, args=("Price Returns",), key="price_returns_button")
         st.sidebar.button("Slope of Trend Lines", on_click=set_page, args=("Trend Slope",), key="trend_slope_button")
         st.sidebar.button("Volatility Indicators", on_click=set_page, args=("Volatility Indicators",), key="volatility_button")
         #st.sidebar.button("Spectral Analysis", on_click=set_page, args=("Spectral Analysis",), key="spectral_analysis_button")
@@ -109,19 +111,21 @@ def main():
             st.sidebar.button("Random Forest Model", on_click=set_page, args=("Random Forest",), key="random_forest_button")
         #================================================================================
 
-        st.sidebar.button("Contact Us", on_click=set_page, args=("Contact Us",), key="contact_us_button")
+        #st.sidebar.button("Contact Us", on_click=set_page, args=("Contact Us",), key="contact_us_button")
         st.sidebar.button("Feedback", on_click=set_page, args=("Feedback",), key="feedback_button")
         st.sidebar.button("Logout", on_click=logout, key="logout_button")
 
         # Display the current page
         if st.session_state.page == "Load Data":
             load_data()
+        elif st.session_state.page == "Fundamentals":
+            fundamentals()
         elif st.session_state.page == "Visualize Data":
             visualize_data()
         elif st.session_state.page == "Moving Analysis":
             moving_indicators()
-        elif st.session_state.page == "Price Returns":
-            calculate_price_returns()
+        # elif st.session_state.page == "Price Returns":
+        #     calculate_price_returns()
         elif st.session_state.page == "Trend Slope":
             compute_trend_slope()
         elif st.session_state.page == "Volatility Indicators":
@@ -157,8 +161,8 @@ def main():
         #    spectral_analysis()
         elif st.session_state.page == "SVM":
             svm_model()
-        elif st.session_state.page == "Contact Us":
-            contact_us()
+        # elif st.session_state.page == "Contact Us":
+        #     contact_us()
         elif st.session_state.page == "Feedback":
             feedback_form() 
     else:

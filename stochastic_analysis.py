@@ -29,12 +29,13 @@ def stochastic_analysis():
     """
     Perform stochastic analysis and visualize %K and %D indicators.
     """
-    st.title("Stochastic Analysis")
-    st.markdown(f"Stock: {st.session_state['symbol']}")
+
     if 'data' not in st.session_state:
-        st.error("No data loaded. Please load data first.")
+        st.error("Please load the data first from the sidebar on the left.")
         return
 
+    st.title("Stochastic Analysis")
+    st.markdown(f"Stock: {st.session_state['symbol']}")
     data = st.session_state['data']
 
     # Inputs for Stochastic Oscillator
@@ -67,6 +68,8 @@ def stochastic_analysis():
             The Stochastic Oscillator is a momentum indicator commonly used in technical analysis to assess the closing price of a security relative to its price range over a specific period.\n 
             A bullish signal occurs when %K crosses above %D in the oversold region.\n
             A bearish signal occurs when %K crosses below %D in the overbought region.\n
+            Overbought (Above 80): Indicates that the price is trading near the upper end of its recent range and may be due for a correction or reversal.\n
+            Oversold (Below 20): Suggests the price is trading near the lower end of its recent range and may be due for a rebound. \n    
             If the price makes a new high but the oscillator does not, it indicates weakening momentum (bearish divergence).\n
             If the price makes a new low but the oscillator does not, it indicates strengthening momentum (bullish divergence).
 

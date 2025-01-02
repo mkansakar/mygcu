@@ -25,13 +25,14 @@ def compute_rsi(series, period=14):
 
 # Main function for the Streamlit app
 def svm_model():
-    st.title("Support Vector Machine for Next Day Price Movement")
 
     # Check if data is loaded in session state
     if 'data' not in st.session_state or st.session_state['data'] is None:
-        st.error("Please load the data first.")
+        st.error("Please load the data first from the sidebar on the left.")
         return
-
+    
+    st.title("SVM Price Movement")
+    st.markdown(f"Stock: {st.session_state['symbol']}")
     # Load data from session state
     data = st.session_state['data']
 

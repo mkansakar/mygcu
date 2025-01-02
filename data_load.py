@@ -36,19 +36,24 @@ def load_data():
     # Fetch the data when the button is clicked
     if st.button("Load Data"):
         try:
+            
             stock = yf.Ticker(stock_symbol)
             full_name = stock.info.get("longName", "N/A")
             data = stock.history(start=start_date, end=end_date)
+            
             if not data.empty:
                 #st.success(f"Data successfully loaded for {stock_symbol} from {start_date} to {end_date}.")
                 #st.subheader(f"{stock_symbol} Closing Price")
-                fig = px.line(data, x=data.index, y="Close", title=f"Closing Price Over Time - {full_name}")
+                
+                fig = px.line(data, x=data.index, y="Close") #, title=f"Closing Price Over Time - {full_name}")
                 fig.update_xaxes(title="Date")
                 fig.update_yaxes(title="Price")
                 st.plotly_chart(fig)                
                 #st.write(data.tail())  # Display the first few rows
-                st.session_state['data'] = data  # Store data in session state
+                
+                st.session_state['data'] = data.iloc[:, :-2]  # Store data in session state
                 st.session_state['symbol'] = full_name
+                st.session_state['stock_symbol'] = stock_symbol
             else:
                 st.warning(f"No data found for {stock_symbol} in the specified date range.")
         except Exception as e:
