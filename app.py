@@ -66,7 +66,7 @@ def footer():
         }
         </style>
         <div class="footer">
-            <p>© 2024 Trade Bot. All rights reserved.</p>
+            <p>© 2025 Trade Bot. All rights reserved.</p>
         </div>
         """,
         unsafe_allow_html=True
