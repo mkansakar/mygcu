@@ -57,7 +57,7 @@ def spectral_analysis():
     top_frequencies = spectral_df.nlargest(5, "Power")
     st.write(top_frequencies)
 
-    with st.expander("What is Spectral Analysis ?"):
+    with st.expander("What is Spectral Analysis?"):
         st.write("""
             Spectral analysis in stock price forecasting is a mathematical technique used to decompose a time-series signal into its frequency components. It helps identify periodic patterns, trends, and cyclical behaviors in the data by transforming the time-domain series into the frequency domain.\n 
             Dominant Frequencies: Peaks in the frequency spectrum correspond to dominant cycles in the stock price data.\n

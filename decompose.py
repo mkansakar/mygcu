@@ -53,21 +53,6 @@ def decompose_time_series():
             "residual": decomposition.resid
         }
 
-        # Display components as dataframes
-        #st.subheader("Decomposed Components as DataFrame")
-        #trend_df = decomposition.trend.dropna().to_frame(name="Trend")
-        #seasonal_df = decomposition.seasonal.dropna().to_frame(name="Seasonal")
-        #residual_df = decomposition.resid.dropna().to_frame(name="Residual")
-
-        #st.write("Trend Component")
-        #st.dataframe(trend_df)
-
-        #st.write("Seasonal Component")
-        #st.dataframe(seasonal_df)
-
-        #st.write("Residual Component")
-        #st.dataframe(residual_df)
-
     except ValueError as e:
         st.error(f"Decomposition failed: {str(e)}")
     with st.expander("What is Time series Decomposition?"):

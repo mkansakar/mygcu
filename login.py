@@ -17,9 +17,12 @@ def login():
 
     # Login button
     if st.button("Login"):
-        if authenticate_user(username, password):
+        authenticated, role = authenticate_user(username, password)
+        if authenticated:
             st.session_state.authenticated = True
-            st.success("Login successful! Welcome back.")
+            st.session_state.username = username
+            st.session_state.role = role
+            #st.success("Login successful! Welcome back.")
             st.rerun()  # Refresh the page to show authenticated content
             st.session_state.page = "Load Data"  # Redirect to Load Data after login
         else:
@@ -38,5 +41,9 @@ def logout():
     """
     if st.button("Logout"):
         st.session_state.authenticated = False
+        st.session_state.page = "Login"
+        st.session_state.username = ""
+        if 'data' in st.session_state:
+            del st.session_state['data']
         st.success("You have been logged out.")
         st.rerun()

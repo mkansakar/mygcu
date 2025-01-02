@@ -48,5 +48,11 @@ def feedback_form():
             st.error("Please enter your name and comments to submit feedback.")
 
 # Main function to display the feedback page
-def feedback_page():
-    feedback_form()
+
+# Contact Information
+    st.write("""
+    About us:
+    - **Email**: mkansakar2013[@]gmail.com  
+    - **Phone**: +1-781-609-8099  
+    - **Address**: 5 Warren St. Arlington, MA 02474
+    """)

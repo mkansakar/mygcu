@@ -1,5 +1,5 @@
 import streamlit as st
-from database import add_user, initialize_database
+from database_bak import add_user, initialize_database
 
 def register_user():
     """
