@@ -19,7 +19,7 @@ from stochastic_analysis import stochastic_analysis
 
 # Set the page title and favicon
 st.set_page_config(
-    page_title="Stock Bot",  # Title that appears on the browser tab
+    page_title="Trade Bot",  # Title that appears on the browser tab
     page_icon="📈",  # Emoji or a path to a favicon image
 )
 
@@ -125,8 +125,6 @@ def main():
             random_forest_classification()
         elif st.session_state.page == "Logistic Regression":
             logistic_regression()
-        #elif st.session_state.page == "SARIMA Model":
-        #    sarima_model()
         elif st.session_state.page == "SVM":
             svm_model()
         elif st.session_state.page == "Feedback":
