@@ -28,10 +28,6 @@ def login():
         else:
             st.error("Invalid username or password. Please try again.")
 
-    # Link to the registration page
-    #st.write("Don't have an account? [Register here](#)")
-    #url = "./register.py"
-    #st.page_link("./registration.py",label="Don't have an account?")
 
     return st.session_state.get("authenticated", False)
 
