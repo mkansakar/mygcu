@@ -1,7 +1,7 @@
 import sqlite3
 from bcrypt import hashpw, gensalt, checkpw
 
-DB_PATH = "users.db"
+DB_PATH = "us3rs_23.db"
 
 def initialize_database():
     """
