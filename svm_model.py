@@ -1,77 +1,59 @@
 import streamlit as st
 from sklearn.svm import SVC
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report
 from sklearn.preprocessing import StandardScaler
 import pandas as pd
 import numpy as np
+from data_preprocessing import preprocess_data, split_data
 
-# Function to calculate technical indicators
-def add_technical_indicators(data):
-    data['SMA_10'] = data['Close'].rolling(window=10).mean()
-    data['SMA_50'] = data['Close'].rolling(window=50).mean()
-    data['RSI'] = compute_rsi(data['Close'])
-    data['Volatility'] = data['Close'].rolling(window=10).std()
-    return data
-
-# Function to compute RSI
-def compute_rsi(series, period=14):
-    delta = series.diff(1)
-    gain = (delta.where(delta > 0, 0)).rolling(window=period).mean()
-    loss = (-delta.where(delta < 0, 0)).rolling(window=period).mean()
-    rs = gain / loss
-    rsi = 100 - (100 / (1 + rs))
-    return rsi
-
-# Main function for the Streamlit app
 def svm_model():
-
-    # Check if data is loaded in session state
     if 'data' not in st.session_state or st.session_state['data'] is None:
-        st.error("Please load the data first from the sidebar on the left.")
+        st.error("Please load the data first from the sidebar on the left")
         return
     
     st.title("SVM Price Movement")
     st.markdown(f"Stock: {st.session_state['symbol']}")
-    # Load data from session state
-    data = st.session_state['data']
-
-    # Add technical indicators
-    data = add_technical_indicators(data)
-
-    # Generate the target for next-day movement
-    data['Target'] = (data['Close'].shift(-1) > data['Close']).astype(int)
-
-    # Drop rows with NaN values due to shifting and indicator calculations
-    data = data.dropna()
-
-    # Prepare features and target
-    features = data.drop(['Target', 'Close'], axis=1)
-    target = data['Target']
-
-    # Scale the features
-    scaler = StandardScaler()
-    scaled_features = scaler.fit_transform(features)
-
-    # Split data into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(scaled_features, target, test_size=0.2, random_state=42)
-
-    # Train the SVM model
+    
+    data = preprocess_data(st.session_state['data'].copy())
+    features, target, splits = split_data(data)
+    
+    for train_idx, test_idx in splits:
+        X_train, X_test = features[train_idx], features[test_idx]
+        y_train, y_test = target.iloc[train_idx], target.iloc[test_idx]
+    
     model = SVC()
     model.fit(X_train, y_train)
-
-    # Make predictions on the test set
     predictions = model.predict(X_test)
-
-    # Evaluate the model
+    
     accuracy = accuracy_score(y_test, predictions)
-    st.write(f"Accuracy: {accuracy:.2f}")
-    st.text(classification_report(y_test, predictions))
+    precision = precision_score(y_test, predictions)
+    recall = recall_score(y_test, predictions)
+    f1 = f1_score(y_test, predictions)
+    
+    st.write(f"__Model Performance__:")
+    st.write(f"Accuracy: {accuracy * 100:.2f}%")
+    st.write(f"Precision: {precision:.2f}")
+    st.write(f"Recall: {recall:.2f}")
+    st.write(f"F1 Score: {f1:.2f}")
+    
+    # Next Day Prediction
+    st.write("__Next Day Prediction__:")
+    last_row = features[-1].reshape(1, -1)
+    prediction = model.predict(last_row)
+    st.write("Next Day Price Movement: **Up**" if prediction[0] == 1 else "Next Day Price Movement: **Down**")
 
-    # Predict the next day's movement
-    last_row = scaled_features[[-1]]  # Use the last available row for prediction
-    next_day_prediction = model.predict(last_row)[0]
 
-    # Display the prediction result
-    movement = "UP" if next_day_prediction == 1 else "DOWN"
-    st.write(f"Predicted next day's movement: **{movement}**")
+    with st.expander("What is Support Vector Machine?"):
+        st.write("""
+            Support Vector Machine (SVM) is a powerful supervised learning algorithm used for classification and regression tasks. In stock price movement prediction, SVM is used as a classifier to determine whether a stock will go up or down based on historical and technical data.\n
+            Interpretation & Reliability:\n
+                Higher Accuracy (close to 1 or 100%) → The model makes very few mistakes.\n
+                Lower Accuracy → The model struggles to differentiate between classes.\n
+                High Precision → Few false positives (FP), meaning when the model predicts positive, it is usually correct.\n
+                Low Precision → Many false positives, meaning the model frequently predicts positive incorrectly.\n
+                High Recall → Few false negatives (FN), meaning the model captures most of the actual positive cases.\n
+                Low Recall → Many false negatives, meaning the model misses too many actual positive cases.\n
+                High F1-Score → The model is good at both Precision and Recall.\n
+                Low F1-Score → The model either has a low Precision or Recall (or both).
+        """)

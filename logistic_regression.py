@@ -1,123 +1,65 @@
+from data_preprocessing import preprocess_data, split_data
 import streamlit as st
+import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split, GridSearchCV, cross_val_score
+from sklearn.model_selection import cross_val_score
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, classification_report
 from sklearn.preprocessing import StandardScaler, PolynomialFeatures
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from sklearn.model_selection import TimeSeriesSplit
 
-def calculate_rsi(data, column='Close', window=14):
-    """
-    Calculate the Relative Strength Index (RSI).
-    """
-    delta = data[column].diff()
-    gain = (delta.where(delta > 0, 0)).rolling(window=window).mean()
-    loss = (-delta.where(delta < 0, 0)).rolling(window=window).mean()
-    rs = gain / loss
-    rsi = 100 - (100 / (1 + rs))
-    return rsi
-
-def calculate_macd(data, column='Close', short_window=12, long_window=26, signal_window=9):
-    """
-    Calculate the MACD and Signal Line.
-    """
-    short_ema = data[column].ewm(span=short_window, adjust=False).mean()
-    long_ema = data[column].ewm(span=long_window, adjust=False).mean()
-    macd = short_ema - long_ema
-    signal_line = macd.ewm(span=signal_window, adjust=False).mean()
-    return macd, signal_line
-
-def calculate_atr(data, high='High', low='Low', close='Close', window=14):
-    """
-    Calculate the Average True Range (ATR).
-    """
-    high_low = data[high] - data[low]
-    high_close = (data[high] - data[close].shift()).abs()
-    low_close = (data[low] - data[close].shift()).abs()
-    true_range = pd.concat([high_low, high_close, low_close], axis=1).max(axis=1)
-    atr = true_range.rolling(window=window).mean()
-    return atr
-
-def calculate_cmf(data, high='High', low='Low', close='Close', volume='Volume', window=20):
-    """
-    Calculate the Chaikin Money Flow (CMF).
-    """
-    money_flow_multiplier = ((data[close] - data[low]) - (data[high] - data[close])) / (data[high] - data[low])
-    money_flow_volume = money_flow_multiplier * data[volume]
-    cmf = money_flow_volume.rolling(window=window).sum() / data[volume].rolling(window=window).sum()
-    return cmf
 
 def logistic_regression():
-    """
-    Logistic Regression with Feature Engineering for Price Movement Prediction.
-    """
-
     if 'data' not in st.session_state or st.session_state['data'] is None:
         st.error("Please load the data first from the sidebar on the left")
         return
-
+    
     st.title("Logistic Regression Price Movement")
     st.markdown(f"Stock: {st.session_state['symbol']}")
+    
+    # Preprocess data
+    data = preprocess_data(st.session_state['data'].copy())
+    features, target, _ = split_data(data)# Ensure `split_data()` returns clean X, y
 
-    data = st.session_state['data'].copy()
+    features = pd.DataFrame(features)  # Convert features to DataFrame
+    target = pd.Series(target).reset_index(drop=True)  # Convert target to Pandas Series   
 
-    # Add target variable
-    data['Target'] = (data['Close'].shift(-1) > data['Close']).astype(int)
+    # Time Series Cross-Validation
+    tscv = TimeSeriesSplit(n_splits=5)  # Define 5 folds for time-series cross-validation
+    accuracies, precisions, recalls, f1_scores = [], [], [], []
+    
+    for train_idx, test_idx in tscv.split(features):
+        X_train, X_test = features.iloc[train_idx], features.iloc[test_idx]
+        y_train, y_test = target.iloc[train_idx], target.iloc[test_idx]
 
-    # Add Moving Averages
-    data['SMA_10'] = data['Close'].rolling(window=10).mean()
-    data['SMA_20'] = data['Close'].rolling(window=20).mean()
+        model = LogisticRegression(max_iter=1000)
+        model.fit(X_train, y_train)
+        predictions = model.predict(X_test)
 
-    # Add RSI
-    data['RSI'] = calculate_rsi(data)
-
-    # Add MACD
-    data['MACD'], data['Signal_Line'] = calculate_macd(data)
-
-    # Add ATR
-    data['ATR'] = calculate_atr(data)
-
-    # Add CMF
-    data['CMF'] = calculate_cmf(data)
-
-    data['Momentum'] = data['Close'] - data['Close'].shift(10)
-    data['Daily_Return'] = data['Close'].pct_change()
-
-    # Drop NaN values resulting from calculations
-    data.dropna(inplace=True)
-
-    # Define features and target
-    features = data[['Close', 'SMA_10', 'SMA_20', 'RSI', 'MACD', 'Signal_Line', 'Momentum', 'Daily_Return', 'ATR', 'CMF']]
-    target = data['Target']
-
-    # Create interaction terms between features
-    poly = PolynomialFeatures(interaction_only=True, include_bias=False)
-    interaction_features = poly.fit_transform(features)
-
-    # Update feature names for interaction terms
-    feature_names = poly.get_feature_names_out(features.columns)
-    features = pd.DataFrame(interaction_features, columns=feature_names, index=features.index)
-
-    # Split data into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(features, target, test_size=0.2, random_state=42)
-
-    # Train Logistic Regression model with cross-validation
-    model = LogisticRegression()
-    cross_val_scores = cross_val_score(model, X_train, y_train, cv=5)
-    st.write(f"Cross-Validation Accuracy Scores: {cross_val_scores}")
-    st.write(f"Mean Cross-Validation Accuracy: {cross_val_scores.mean() * 100:.2f}%")
-
-    # Fit the model on the full training data
-    model.fit(X_train, y_train)
-
-    # Make predictions
-    predictions = model.predict(X_test)
-
-    # Evaluate model
-    accuracy = accuracy_score(y_test, predictions)
-    st.write(f"Model Accuracy: {accuracy * 100:.2f}%")
-
+        # Compute metrics
+        accuracies.append(accuracy_score(y_test, predictions))
+        precisions.append(precision_score(y_test, predictions))
+        recalls.append(recall_score(y_test, predictions))
+        f1_scores.append(f1_score(y_test, predictions))
+    
+    # Display averaged performance metrics
+    st.write("__Model Performance Across Time-Series Splits__:")    
+    st.write(f"Accuracy: {np.mean(accuracies) * 100:.2f}%")
+    st.write(f"Precision: {np.mean(precisions):.2f}")
+    st.write(f"Recall: {np.mean(recalls):.2f}")
+    st.write(f"F1 Score: {np.mean(f1_scores):.2f}")
+    
     # Predict next day's movement
-    st.subheader("Next Day Prediction")
-    last_row = features.iloc[-1:].values
+    st.write("__Next Day Prediction__:")    
+    last_row = features.iloc[[-1]]  # Corrected reshape for single sample
     prediction = model.predict(last_row)
     st.write("Next Day Price Movement: **Up**" if prediction[0] == 1 else "Next Day Price Movement: **Down**")
+
+    with st.expander("What is Logistic Regression?"):
+        st.write("""
+            Logistic Regression is a statistical model used for binary classification, meaning it predicts one of two possible outcomes. In the case of stock price movement, it is commonly used to predict whether a stock will go up or down on the next trading day.\n
+            Interpretation & Reliability:\n
+                The low accuracy means the model struggles with predicting price movements accurately.\n
+                Since stock price movements are inherently noisy and difficult to predict, Logistic Regression might not be the best model for this task. \n
+                Real-world trading decisions should not rely solely on this prediction, as the model’s poor performance indicates high uncertainty.     
+        """)
