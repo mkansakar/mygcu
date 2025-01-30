@@ -16,6 +16,9 @@ def compare_models():
     
     st.title("Model Comparison")
     
+    
+    st.markdown(f"Stock: {st.session_state['symbol']}")
+
     data = preprocess_data(st.session_state['data'].copy())
     features, target, _ = split_data(data)
     
