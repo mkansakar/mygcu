@@ -8,7 +8,7 @@ def load_data():
     st.title("Load Stock Price Data")
 
     end_date_default = datetime.today()
-    start_date_default = end_date_default - timedelta(days=365)
+    start_date_default = end_date_default - timedelta(days=1825)
 
     col1, col2, col3 = st.columns(3)
 
@@ -21,9 +21,9 @@ def load_data():
     with col3:
         end_date = st.date_input("End Date", value=end_date_default, max_value=end_date_default)
 
-    if (end_date - start_date).days > 365:
-        st.warning("The date range cannot exceed 365 days. Please adjust the dates.")
-        return
+    # if (end_date - start_date).days > 365:
+    #     st.warning("The date range cannot exceed 365 days. Please adjust the dates.")
+    #     return
     
     if st.button("Load Data"):
         try:
