@@ -1,3 +1,4 @@
+#data_load.py
 import streamlit as st
 import yfinance as yf
 import pandas as pd
@@ -30,7 +31,24 @@ def load_data():
             stock = yf.Ticker(stock_symbol)
             full_name = stock.info.get("longName", "N/A")
             data = stock.history(start=start_date, end=end_date)
+            data.index = pd.to_datetime(data.index).date
+
+
+
+            gold = yf.Ticker("GC=F").history(start=start_date, end=end_date)
+            gold = gold[['Close']].rename(columns={'Close': 'Gold_Close'})
+            gold.index = pd.to_datetime(gold.index).date
             
+            # Fetch GBP/USD Exchange Rate (GBPUSD=X)
+            pound = yf.Ticker("GBPUSD=X").history(start=start_date, end=end_date)
+            pound = pound[['Close']].rename(columns={'Close': 'GBPUSD'})
+            pound.index = pd.to_datetime(pound.index).date
+            #st.write(pound.tail(2)) 
+
+            
+            data = data.join(gold, how='left')
+            data = data.join(pound, how='left')
+
             if not data.empty:
                 st.subheader(f"{stock_symbol} Closing Price")
                 fig = px.line(data, x=data.index, y="Close")
@@ -38,7 +56,11 @@ def load_data():
                 fig.update_yaxes(title="Price")
                 st.plotly_chart(fig)
 
-                st.session_state['data'] = data.iloc[:, :-2]
+                st.write(data.tail(2))
+
+                #st.session_state['data'] = data.iloc[:, :-2]
+                st.session_state['data'] = data.drop(columns=['Dividends', 'Stock Splits'], errors='ignore')
+                #data = data.drop(columns=['Dividends', 'Stock Splits'], errors='ignore')
                 st.session_state['symbol'] = full_name
                 st.session_state['stock_symbol'] = stock_symbol
                 

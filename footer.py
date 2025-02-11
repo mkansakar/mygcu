@@ -1,3 +1,4 @@
+#footer.py
 import streamlit as st
 
 def display_footer():

@@ -1,7 +1,8 @@
+# svm_model.py
 import streamlit as st
 from sklearn.svm import SVC
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report
+from sklearn.model_selection import cross_val_score, TimeSeriesSplit
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.preprocessing import StandardScaler
 import pandas as pd
 import numpy as np
@@ -14,46 +15,61 @@ def svm_model():
     
     st.title("SVM Price Movement")
     st.markdown(f"Stock: {st.session_state['symbol']}")
-    
+
+    # Preprocess Data
     data = preprocess_data(st.session_state['data'].copy())
     features, target, splits = split_data(data)
+
+    # Define SVM Model
+    model = SVC(kernel='rbf', C=1.0, probability=True)
+
+    # Implement Cross-Validation (Time Series Split)
+    tscv = TimeSeriesSplit(n_splits=5)
     
-    for train_idx, test_idx in splits:
+    accuracy_scores = []
+    precision_scores = []
+    recall_scores = []
+    f1_scores = []
+
+    for train_idx, test_idx in tscv.split(features):
         X_train, X_test = features[train_idx], features[test_idx]
         y_train, y_test = target.iloc[train_idx], target.iloc[test_idx]
-    
-    model = SVC()
-    model.fit(X_train, y_train)
-    predictions = model.predict(X_test)
-    
-    accuracy = accuracy_score(y_test, predictions)
-    precision = precision_score(y_test, predictions)
-    recall = recall_score(y_test, predictions)
-    f1 = f1_score(y_test, predictions)
-    
-    st.write(f"__Model Performance__:")
-    st.write(f"Accuracy: {accuracy * 100:.2f}%")
-    st.write(f"Precision: {precision:.2f}")
-    st.write(f"Recall: {recall:.2f}")
-    st.write(f"F1 Score: {f1:.2f}")
-    
-    # Next Day Prediction
-    st.write("__Next Day Prediction__:")
+
+        model.fit(X_train, y_train)
+        predictions = model.predict(X_test)
+
+        # Store Performance Metrics
+        accuracy_scores.append(accuracy_score(y_test, predictions))
+        precision_scores.append(precision_score(y_test, predictions))
+        recall_scores.append(recall_score(y_test, predictions))
+        f1_scores.append(f1_score(y_test, predictions))
+
+    # Compute Average Scores
+    avg_accuracy = np.mean(accuracy_scores)
+    avg_precision = np.mean(precision_scores)
+    avg_recall = np.mean(recall_scores)
+    avg_f1 = np.mean(f1_scores)
+
+    # Display Results
+    st.write(f"__Model Performance (Cross-Validation)__:")
+    st.write(f"Accuracy: {avg_accuracy * 100:.2f}%")
+    st.write(f"Precision: {avg_precision:.2f}")
+    st.write(f"Recall: {avg_recall:.2f}")
+    st.write(f"F1 Score: {avg_f1:.2f}")
+
+    # Next-Day Prediction
+    st.write("__Next Day Prediction__:")    
     last_row = features[-1].reshape(1, -1)
     prediction = model.predict(last_row)
     st.write("Next Day Price Movement: **Up**" if prediction[0] == 1 else "Next Day Price Movement: **Down**")
-
 
     with st.expander("What is Support Vector Machine?"):
         st.write("""
             Support Vector Machine (SVM) is a powerful supervised learning algorithm used for classification and regression tasks. In stock price movement prediction, SVM is used as a classifier to determine whether a stock will go up or down based on historical and technical data.\n
             Interpretation & Reliability:\n
-                Higher Accuracy (close to 1 or 100%) → The model makes very few mistakes.\n
-                Lower Accuracy → The model struggles to differentiate between classes.\n
-                High Precision → Few false positives (FP), meaning when the model predicts positive, it is usually correct.\n
-                Low Precision → Many false positives, meaning the model frequently predicts positive incorrectly.\n
-                High Recall → Few false negatives (FN), meaning the model captures most of the actual positive cases.\n
-                Low Recall → Many false negatives, meaning the model misses too many actual positive cases.\n
-                High F1-Score → The model is good at both Precision and Recall.\n
-                Low F1-Score → The model either has a low Precision or Recall (or both).
+                - **Higher Accuracy** → Fewer mistakes in predictions.\n
+                - **High Precision** → Few false positives (incorrectly predicting an "Up" movement).\n
+                - **High Recall** → Few false negatives (missing actual "Up" movements).\n
+                - **High F1-Score** → Good balance between Precision and Recall.
         """)
+

@@ -1,3 +1,4 @@
+#data_preprocessing.py
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import TimeSeriesSplit
@@ -32,6 +33,7 @@ def calculate_cmf(data, high='High', low='Low', close='Close', volume='Volume', 
     cmf = money_flow_volume.rolling(window=window).sum() / data[volume].rolling(window=window).sum()
     return cmf
 
+
 def preprocess_data(data):
     data = data.copy()
     data['SMA_10'] = data['Close'].rolling(window=10).mean()
@@ -40,13 +42,13 @@ def preprocess_data(data):
     data['MACD'], data['Signal_Line'] = calculate_macd(data)
     data['ATR'] = calculate_atr(data)
     data['CMF'] = calculate_cmf(data)
-    data['Momentum'] = data['Close'] - data['Close'].shift(10)
+    data['Momentum'] = data['Close'] - data['Close'].shift(5)
     data['Daily_Return'] = data['Close'].pct_change()
     data.dropna(inplace=True)
     return data
 
 def split_data(data):
-    features = data[['Close', 'SMA_10', 'SMA_20', 'RSI', 'MACD', 'Signal_Line', 'Momentum', 'Daily_Return', 'ATR', 'CMF']]
+    features = data[['Close', 'SMA_10', 'SMA_20', 'RSI', 'MACD', 'Signal_Line', 'Momentum', 'Daily_Return', 'ATR', 'CMF', 'Gold_Close', 'GBPUSD']]
     target = (data['Close'].shift(-1) > data['Close']).astype(int)
     
     scaler = StandardScaler()

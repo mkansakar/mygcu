@@ -7,7 +7,7 @@ from data_visualization import visualize_data
 #from fundamentals import fundamentals
 from moving import moving_indicators
 from trend_slope import compute_trend_slope
-from decompose import decompose_time_series
+#from decompose import decompose_time_series
 from volatility_indicators import display_volatility_indicators
 #from arima import arima_model
 from feedback import feedback_form
@@ -15,6 +15,7 @@ from feedback import feedback_form
 from logistic_regression import logistic_regression
 from svm_model import svm_model
 from random_forest_classification import random_forest_classification
+#from xgboost_model import train_xgboost 
 from stochastic_analysis import stochastic_analysis
 from model_comparison import compare_models
 
@@ -86,7 +87,7 @@ def main():
         st.sidebar.button("Slope of Trend Lines", on_click=set_page, args=("Trend Slope",), key="trend_slope_button")
         st.sidebar.button("Volatility Indicators", on_click=set_page, args=("Volatility Indicators",), key="volatility_button")
         #st.sidebar.button("Spectral Analysis", on_click=set_page, args=("Spectral Analysis",), key="spectral_analysis_button")
-        st.sidebar.button("Time Series Decomposition", on_click=set_page, args=("Decomposition",), key="decomposition_button")
+        #st.sidebar.button("Time Series Decomposition", on_click=set_page, args=("Decomposition",), key="decomposition_button")
         st.sidebar.button("Stochastic Analysis", on_click=set_page, args=("Stochastic Analysis",), key="stochastic_analysis_button")
 
         #========================Advanced features for admin only=======================
@@ -96,6 +97,7 @@ def main():
             st.sidebar.button("Logistic Regression Model", on_click=set_page, args=("Logistic Regression",), key="logistic_regression_button")
             st.sidebar.button("SVM Model", on_click=set_page, args=("SVM",), key="svm_button")
             st.sidebar.button("Random Forest Model", on_click=set_page, args=("Random Forest",), key="random_forest_button")
+            #st.sidebar.button("XGBoost Model", on_click=set_page, args=("XGBoost",), key="xgboost_button")
             st.sidebar.button("Model Comparison", on_click=set_page, args=("Model Comparison",), key="model_comparison_button")
         #================================================================================
 
@@ -115,8 +117,8 @@ def main():
             compute_trend_slope()
         elif st.session_state.page == "Volatility Indicators":
             display_volatility_indicators()
-        elif st.session_state.page == "Decomposition":
-            decompose_time_series()
+        # elif st.session_state.page == "Decomposition":
+        #     decompose_time_series()
         elif st.session_state.page == "Stochastic Analysis":
             stochastic_analysis()
         #elif st.session_state.page == "Spectral Analysis":
@@ -129,6 +131,8 @@ def main():
             logistic_regression()
         elif st.session_state.page == "SVM":
             svm_model()
+        # elif st.session_state.page == "XGBoost":
+        #     train_xgboost()
         elif st.session_state.page == "Model Comparison":
             compare_models()        
         elif st.session_state.page == "Feedback":

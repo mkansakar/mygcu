@@ -1,3 +1,4 @@
+#database.py
 import sqlite3
 from bcrypt import hashpw, gensalt, checkpw
 

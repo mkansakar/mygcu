@@ -1,3 +1,4 @@
+#registration.py
 import streamlit as st
 from database import add_user, initialize_database
 

@@ -1,3 +1,4 @@
+#logistic_regression.py
 from data_preprocessing import preprocess_data, split_data
 import streamlit as st
 import numpy as np
@@ -19,6 +20,9 @@ def logistic_regression():
     
     # Preprocess data
     data = preprocess_data(st.session_state['data'].copy())
+
+
+
     features, target, _ = split_data(data)# Ensure `split_data()` returns clean X, y
 
     features = pd.DataFrame(features)  # Convert features to DataFrame
@@ -54,6 +58,9 @@ def logistic_regression():
     last_row = features.iloc[[-1]]  # Corrected reshape for single sample
     prediction = model.predict(last_row)
     st.write("Next Day Price Movement: **Up**" if prediction[0] == 1 else "Next Day Price Movement: **Down**")
+
+
+    st.write(data.tail(2))
 
     with st.expander("What is Logistic Regression?"):
         st.write("""

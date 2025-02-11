@@ -1,3 +1,4 @@
+# model_comparison.py
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -5,9 +6,11 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 from data_preprocessing import preprocess_data, split_data
 from sklearn.model_selection import TimeSeriesSplit, cross_val_score
 from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, VotingClassifier
+from xgboost import XGBClassifier
 from sklearn.svm import SVC
-
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 def compare_models():
     if 'data' not in st.session_state or st.session_state['data'] is None:
@@ -15,19 +18,32 @@ def compare_models():
         return
     
     st.title("Model Comparison")
-    
-    
     st.markdown(f"Stock: {st.session_state['symbol']}")
 
     data = preprocess_data(st.session_state['data'].copy())
     features, target, _ = split_data(data)
     
+    # Define individual models
     models = {
         "Logistic Regression": LogisticRegression(),
         "Random Forest": RandomForestClassifier(n_estimators=100, random_state=42),
-        "SVM": SVC()
+        "XGBoost": XGBClassifier(random_state=42),
+        "SVM": SVC(probability=True)  # Enable probability for Voting Classifier
     }
     
+    # Ensemble: Voting Classifier (Soft Voting)
+    ensemble_model = VotingClassifier(
+        estimators=[
+            ("LogReg", models["Logistic Regression"]),
+            ("RandomForest", models["Random Forest"]),
+            ("XGBoost", models["XGBoost"]),
+            ("SVM", models["SVM"])
+        ],
+        voting="soft"  # Soft voting averages probability scores
+    )
+    
+    models["Voting Classifier (Ensemble)"] = ensemble_model
+
     results = []
     tscv = TimeSeriesSplit(n_splits=5)
     
@@ -45,8 +61,18 @@ def compare_models():
             "F1 Score": round(np.mean(f1_scores), 2),
         })
     
+    # Convert results to DataFrame
     results_df = pd.DataFrame(results)
-    
-    # Display metrics table
-    st.subheader("Metrics Table")
-    st.write(results_df.style.set_properties(**{'text-align': 'center'}))
+
+    # Display results
+    st.subheader("Model Performance Comparison")
+    st.dataframe(results_df)
+
+    # Visualization
+    plt.figure(figsize=(10, 6))
+    sns.barplot(x="Model", y="Accuracy", data=results_df, palette="viridis")
+    plt.xticks(rotation=45)
+    plt.title("Model Accuracy Comparison")
+    plt.ylabel("Accuracy")
+    plt.xlabel("Model")
+    st.pyplot(plt)
