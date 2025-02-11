@@ -7,7 +7,7 @@ from data_preprocessing import preprocess_data, split_data
 from sklearn.model_selection import TimeSeriesSplit, cross_val_score
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier, VotingClassifier
-from xgboost import XGBClassifier
+#from xgboost import XGBClassifier
 from sklearn.svm import SVC
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -27,7 +27,7 @@ def compare_models():
     models = {
         "Logistic Regression": LogisticRegression(),
         "Random Forest": RandomForestClassifier(n_estimators=100, random_state=42),
-        "XGBoost": XGBClassifier(random_state=42),
+
         "SVM": SVC(probability=True)  # Enable probability for Voting Classifier
     }
     
@@ -36,7 +36,7 @@ def compare_models():
         estimators=[
             ("LogReg", models["Logistic Regression"]),
             ("RandomForest", models["Random Forest"]),
-            ("XGBoost", models["XGBoost"]),
+
             ("SVM", models["SVM"])
         ],
         voting="soft"  # Soft voting averages probability scores
