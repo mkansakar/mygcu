@@ -1,117 +1,74 @@
+# random_forest_classification.py
 import streamlit as st
 import pandas as pd
-from sklearn.model_selection import train_test_split, GridSearchCV, cross_val_score
+import numpy as np
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, classification_report
-from sklearn.preprocessing import StandardScaler, PolynomialFeatures
-
-def calculate_rsi(data, column='Close', window=14):
-    """
-    Calculate the Relative Strength Index (RSI).
-    """
-    delta = data[column].diff()
-    gain = (delta.where(delta > 0, 0)).rolling(window=window).mean()
-    loss = (-delta.where(delta < 0, 0)).rolling(window=window).mean()
-    rs = gain / loss
-    rsi = 100 - (100 / (1 + rs))
-    return rsi
-
-def calculate_macd(data, column='Close', short_window=12, long_window=26, signal_window=9):
-    """
-    Calculate the MACD and Signal Line.
-    """
-    short_ema = data[column].ewm(span=short_window, adjust=False).mean()
-    long_ema = data[column].ewm(span=long_window, adjust=False).mean()
-    macd = short_ema - long_ema
-    signal_line = macd.ewm(span=signal_window, adjust=False).mean()
-    return macd, signal_line
-
-def calculate_atr(data, high='High', low='Low', close='Close', window=14):
-    """
-    Calculate the Average True Range (ATR).
-    """
-    high_low = data[high] - data[low]
-    high_close = (data[high] - data[close].shift()).abs()
-    low_close = (data[low] - data[close].shift()).abs()
-    true_range = pd.concat([high_low, high_close, low_close], axis=1).max(axis=1)
-    atr = true_range.rolling(window=window).mean()
-    return atr
-
-def calculate_cmf(data, high='High', low='Low', close='Close', volume='Volume', window=20):
-    """
-    Calculate the Chaikin Money Flow (CMF).
-    """
-    money_flow_multiplier = ((data[close] - data[low]) - (data[high] - data[close])) / (data[high] - data[low])
-    money_flow_volume = money_flow_multiplier * data[volume]
-    cmf = money_flow_volume.rolling(window=window).sum() / data[volume].rolling(window=window).sum()
-    return cmf
+from sklearn.model_selection import cross_val_score, TimeSeriesSplit, GridSearchCV
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from data_preprocessing import preprocess_data, split_data
 
 def random_forest_classification():
-    """
-    Random Forest for Stock Price Movement Prediction.
-    """
-
     if 'data' not in st.session_state or st.session_state['data'] is None:
         st.error("Please load the data first from the sidebar on the left")
         return
-
+    
     st.title("Random Forest Price Movement")
     st.markdown(f"Stock: {st.session_state['symbol']}")
 
-    data = st.session_state['data'].copy()
+    # Preprocess Data
+    data = preprocess_data(st.session_state['data'].copy())
+    features, target, splits = split_data(data)
 
-    # Add target variable
-    data['Target'] = (data['Close'].shift(-1) > data['Close']).astype(int)
-
-    # Add Moving Averages
-    data['SMA_10'] = data['Close'].rolling(window=10).mean()
-    data['SMA_20'] = data['Close'].rolling(window=20).mean()
-
-    # Add RSI
-    data['RSI'] = calculate_rsi(data)
-
-    # Add MACD
-    data['MACD'], data['Signal_Line'] = calculate_macd(data)
-
-    # Add ATR
-    data['ATR'] = calculate_atr(data)
-
-    # Add CMF
-    data['CMF'] = calculate_cmf(data)
-
-    data['Momentum'] = data['Close'] - data['Close'].shift(10)
-    data['Daily_Return'] = data['Close'].pct_change()
-
-    # Drop NaN values resulting from calculations
-    data.dropna(inplace=True)
-
-    # Define features and target
-    features = data[['Close', 'SMA_10', 'SMA_20', 'RSI', 'MACD', 'Signal_Line', 'Momentum', 'Daily_Return', 'ATR', 'CMF']]
-    target = data['Target']
-
-    # Split data into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(features, target, test_size=0.2, random_state=42)
-
-    # Train Random Forest model
+    # Define Random Forest Model
     model = RandomForestClassifier(n_estimators=100, random_state=42)
-    model.fit(X_train, y_train)
 
-    # Cross-validation scores
-    cross_val_scores = cross_val_score(model, X_train, y_train, cv=5)
-    st.write(f"Cross-Validation Accuracy Scores: {cross_val_scores}")
-    st.write(f"Mean Cross-Validation Accuracy: {cross_val_scores.mean() * 100:.2f}%")
+    # Implement Cross-Validation (Time Series Split)
+    tscv = TimeSeriesSplit(n_splits=5)
 
-    # Make predictions
-    predictions = model.predict(X_test)
+    accuracy_scores = []
+    precision_scores = []
+    recall_scores = []
+    f1_scores = []
 
-    # Evaluate model
-    accuracy = accuracy_score(y_test, predictions)
-    st.write(f"Model Accuracy: {accuracy * 100:.2f}%")
-    st.text("Classification Report:")
-    st.text(classification_report(y_test, predictions))
+    for train_idx, test_idx in tscv.split(features):
+        X_train, X_test = features[train_idx], features[test_idx]
+        y_train, y_test = target.iloc[train_idx], target.iloc[test_idx]
 
-    # Predict next day's movement
-    st.subheader("Next Day Prediction")
-    last_row = features.iloc[-1:].values
+        model.fit(X_train, y_train)
+        predictions = model.predict(X_test)
+
+        # Store Performance Metrics
+        accuracy_scores.append(accuracy_score(y_test, predictions))
+        precision_scores.append(precision_score(y_test, predictions))
+        recall_scores.append(recall_score(y_test, predictions))
+        f1_scores.append(f1_score(y_test, predictions))
+
+    # Compute Average Scores
+    avg_accuracy = np.mean(accuracy_scores)
+    avg_precision = np.mean(precision_scores)
+    avg_recall = np.mean(recall_scores)
+    avg_f1 = np.mean(f1_scores)
+
+    # Display Results
+    st.write(f"__Model Performance (Cross-Validation)__:")
+    st.write(f"Accuracy: {avg_accuracy * 100:.2f}%")
+    st.write(f"Precision: {avg_precision:.2f}")
+    st.write(f"Recall: {avg_recall:.2f}")
+    st.write(f"F1 Score: {avg_f1:.2f}")
+
+    # Next-Day Prediction
+    st.write("__Next Day Prediction__:")    
+    last_row = features[-1].reshape(1, -1)
     prediction = model.predict(last_row)
     st.write("Next Day Price Movement: **Up**" if prediction[0] == 1 else "Next Day Price Movement: **Down**")
+
+    with st.expander("What is Random Forest?"):
+        st.write("""
+            Random Forest is an ensemble learning method that combines multiple decision trees to improve prediction accuracy and robustness. It is commonly used for stock price movement classification, where the objective is to predict if a stock price will increase (Up), decrease (Down), or remain neutral based on historical market data and technical indicators.\n
+            Interpretation & Reliability:\n
+                - **Higher Accuracy** → Model correctly predicts stock movements.\n
+                - **High Precision** → Few false positives (wrong buy signals).\n
+                - **High Recall** → Few false negatives (missed buying opportunities).\n
+                - **High F1-Score** → Balances Precision and Recall for imbalanced datasets.
+        """)
+

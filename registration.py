@@ -1,3 +1,4 @@
+#registration.py
 import streamlit as st
 from database import add_user, initialize_database
 
@@ -26,6 +27,6 @@ def register_user():
             try:
                 add_user(username, password)
                 st.success("Registration successful! You can now log in.")
-                st.write("Go to the [Login Page](#)")
+                #st.write("Go to the [Login Page](#)")
             except Exception as e:
                 st.error(f"Error: {str(e)}")

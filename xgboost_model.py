@@ -1,31 +1,30 @@
-# svm_model.py
+# xgboost_model.py
 import streamlit as st
-from sklearn.svm import SVC
-from sklearn.model_selection import cross_val_score, TimeSeriesSplit
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-from sklearn.preprocessing import StandardScaler
 import pandas as pd
 import numpy as np
+from xgboost import XGBClassifier
+from sklearn.model_selection import cross_val_score, TimeSeriesSplit
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from data_preprocessing import preprocess_data, split_data
 
-def svm_model():
+def train_xgboost():
     if 'data' not in st.session_state or st.session_state['data'] is None:
         st.error("Please load the data first from the sidebar on the left")
         return
     
-    st.title("SVM Price Movement")
+    st.title("XGBoost Price Movement")
     st.markdown(f"Stock: {st.session_state['symbol']}")
 
     # Preprocess Data
     data = preprocess_data(st.session_state['data'].copy())
     features, target, splits = split_data(data)
 
-    # Define SVM Model
-    model = SVC(kernel='rbf', C=1.0, probability=True)
+    # Define XGBoost Model
+    model = XGBClassifier(use_label_encoder=False, eval_metric='logloss', random_state=42)
 
     # Implement Cross-Validation (Time Series Split)
     tscv = TimeSeriesSplit(n_splits=5)
-    
+
     accuracy_scores = []
     precision_scores = []
     recall_scores = []
@@ -62,14 +61,3 @@ def svm_model():
     last_row = features[-1].reshape(1, -1)
     prediction = model.predict(last_row)
     st.write("Next Day Price Movement: **Up**" if prediction[0] == 1 else "Next Day Price Movement: **Down**")
-
-    with st.expander("What is Support Vector Machine?"):
-        st.write("""
-            Support Vector Machine (SVM) is a powerful supervised learning algorithm used for classification and regression tasks. In stock price movement prediction, SVM is used as a classifier to determine whether a stock will go up or down based on historical and technical data.\n
-            Interpretation & Reliability:\n
-                - **Higher Accuracy** → Fewer mistakes in predictions.\n
-                - **High Precision** → Few false positives (incorrectly predicting an "Up" movement).\n
-                - **High Recall** → Few false negatives (missing actual "Up" movements).\n
-                - **High F1-Score** → Good balance between Precision and Recall.
-        """)
-

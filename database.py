@@ -1,3 +1,4 @@
+#database.py
 import sqlite3
 from bcrypt import hashpw, gensalt, checkpw
 
@@ -28,13 +29,13 @@ def initialize_database():
         default_password = "admin123"
         hashed_password = hashpw(default_password.encode('utf-8'), gensalt())
         cursor.execute("INSERT INTO ustbl3s (username, password, role) VALUES (?, ?, ?)", ("admin", hashed_password, "admin"))
-        cursor.execute("INSERT INTO ustbl3s (username, password) VALUES (?, ?)", ("user1", hashed_password))
+        cursor.execute("INSERT INTO ustbl3s (username, password, role) VALUES (?, ?, ?)", ("user1", hashed_password, "normal"))
         conn.commit()
         
 
     conn.close()
 
-def add_user(username, password, role):
+def add_user(username, password, role="normal"):
     """
     Add a new user to the database with a hashed password and specified role.
     """
@@ -42,7 +43,7 @@ def add_user(username, password, role):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     try:
-        cursor.execute("INSERT INTO ustbl3s (username, password, role) VALUES (?, ?)", (username, hashed_password))
+        cursor.execute("INSERT INTO ustbl3s (username, password, role) VALUES (?, ?, ?)", (username, hashed_password, role))
         conn.commit()
     except sqlite3.IntegrityError:
         print("Error: Username already exists.")
