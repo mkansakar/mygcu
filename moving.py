@@ -42,8 +42,8 @@ def moving_indicators():
         return
     st.title("Moving Averages and Indicators")
     st.markdown(f"Stock: {st.session_state['symbol']}")
-    data = st.session_state['data']
-
+    data = st.session_state['data'].tail(252)
+    #last_30_days = data.tail(60)
     # Moving Averages
     st.header("Moving Averages")
     windows = st.multiselect("Select Moving Average Periods", [5, 15, 30], default=[5, 15, 30])

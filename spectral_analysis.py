@@ -18,7 +18,8 @@ def spectral_analysis():
     st.markdown(f"Stock: {st.session_state['symbol']}")
 
     # Load the data
-    data = st.session_state['data']
+    #data = st.session_state['data']
+    data = st.session_state['data'].tail(252)
 
     # Select column for analysis
     column = st.selectbox("Select a column for spectral analysis", data.columns, index=data.columns.get_loc("Close"))

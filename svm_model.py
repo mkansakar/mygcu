@@ -9,16 +9,15 @@ import numpy as np
 from data_preprocessing import preprocess_data, split_data
 
 def svm_model():
-    if 'data' not in st.session_state or st.session_state['data'] is None:
-        st.error("Please load the data first from the sidebar on the left")
+    if 'filtered_features' not in st.session_state or st.session_state['filtered_features'] is None:
+        st.error("Please proceed with Data Preprocessing to load the preproceed data.")
         return
     
     st.title("SVM Price Movement")
     st.markdown(f"Stock: {st.session_state['symbol']}")
 
     # Preprocess Data
-    data = preprocess_data(st.session_state['data'].copy())
-    features, target, splits = split_data(data)
+    features, target, _ = split_data(st.session_state['filtered_features'])
 
     # Define SVM Model
     model = SVC(kernel='rbf', C=1.0, probability=True)

@@ -28,6 +28,8 @@ def load_data():
     
     if st.button("Load Data"):
         try:
+            st.session_state['data'] = None
+            st.session_state['filtered_features'] = None
             stock = yf.Ticker(stock_symbol)
             full_name = stock.info.get("longName", "N/A")
             data = stock.history(start=start_date, end=end_date)
@@ -73,7 +75,7 @@ def load_data():
             st.error(f"Error downloading data: {e}")
 
     st.subheader("DISCLAIMER")
-    with st.expander("**DISCLAIMER: Please read before proceeding.**"):
+    with st.expander("**DISCLAIMER: Please read before proceeding.**", expanded=True):
         st.write("""        
         The Stock Price Forecast Data Product is intended for informational and educational purposes only. It provides analytical tools and forecasts based on historical stock data and mathematical models. The following points should be carefully considered by all users:
 
