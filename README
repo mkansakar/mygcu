@@ -1,0 +1,48 @@
+Stock Price Movement Prediction
+
+Overview:
+This project is a Stock Price Movement Prediction system that uses machine learning and technical analysis to forecast next-day stock price movement. It integrates logistic regression, random forests, and support vector machines (SVM) along with key financial indicators like Moving Averages, Bollinger Bands, and Stochastic Analysis.
+
+Features:
+User authentication & role-based access control
+Load real-time stock data from Yahoo Finance (yfinance)
+Visualize stock trends using candlestick charts and technical indicators
+Analyze company fundamentals (EPS, P/E ratio, market cap)
+Train & compare machine learning models for prediction
+Deployable on Heroku Cloud
+
+System Architecture: 
+├── app.py                      # Main application entry point  
+├── login.py   					# User authentication page
+├── registration.py				# User registration
+├── database.py                  # SQLite3 database for user authentication  
+├── logistic_regression.py        # Logistic regression model for price movement prediction  
+├── moving.py						# Moving Averages analysis and chart
+├── random_forest_classification.py # Random forest classifier for price prediction  
+├── svm_analysis.py               # Support vector machine model for price prediction  
+├── data_load.py                  # Fetch stock data from Yahoo Finance  
+├── volatility_indicators.py		# Bollinger Bands analysis and Chart
+├── stochastic_analysis.py			# Stochastic analysis and chart
+├── data_preprocessing.py         # Add technical indicators & preprocess data  
+├── visualization.py              # Generate candlestick and indicator charts  
+├── model_comparison.py           # Compare ML models using ensemble techniques  
+└── requirements.txt   				# Python library dependencies
+
+Installation:
+Clone the Repository
+git clone https://github.com/mkansakar/mygcu.git
+cd mygcu
+
+Install Dependencies:
+pip install -r requirements.txt
+
+Run the Application:
+Streamlit run app.py
+
+Deployment on Heroku:
+Login to Heroku
+Create App
+Link GitHub Repo
+Deploy to Heroku app.
+
+License: This project is licensed under the MIT License.
