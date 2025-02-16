@@ -8,16 +8,15 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 from data_preprocessing import preprocess_data, split_data
 
 def random_forest_classification():
-    if 'data' not in st.session_state or st.session_state['data'] is None:
-        st.error("Please load the data first from the sidebar on the left")
+    if 'filtered_features' not in st.session_state or st.session_state['filtered_features'] is None:
+        st.error("Please proceed with Data Preprocessing to load the preproceed data.")
         return
     
     st.title("Random Forest Price Movement")
     st.markdown(f"Stock: {st.session_state['symbol']}")
 
     # Preprocess Data
-    data = preprocess_data(st.session_state['data'].copy())
-    features, target, splits = split_data(data)
+    features, target, _ = split_data(st.session_state['filtered_features'])
 
     # Define Random Forest Model
     model = RandomForestClassifier(n_estimators=100, random_state=42)

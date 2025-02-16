@@ -16,7 +16,8 @@ def compute_trend_slope():
     st.title("Slope of Trend Lines")
     st.markdown(f"Stock: {st.session_state['symbol']}")
     # Select column for slope calculation
-    data = st.session_state['data']
+    #data = st.session_state['data']
+    data = st.session_state['data'].tail(252)
     column = st.selectbox("Select a column for trend slope calculation", data.columns, index=data.columns.get_loc("Close"))
 
     # Rolling window size input

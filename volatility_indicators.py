@@ -36,7 +36,8 @@ def display_volatility_indicators():
     st.title("Volatility Indicators")
     st.markdown(f"Stock: {st.session_state['symbol']}")
     # Select column and window size
-    data = st.session_state['data']
+    #data = st.session_state['data']
+    data = st.session_state['data'].tail(252)
     st.subheader("Bollinger Bands")
     window_bb = st.slider("Select Window Size for Bollinger Bands", min_value=5, max_value=50, value=20, step=1)
 

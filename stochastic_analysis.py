@@ -37,7 +37,8 @@ def stochastic_analysis():
 
     st.title("Stochastic Analysis")
     st.markdown(f"Stock: {st.session_state['symbol']}")
-    data = st.session_state['data']
+    #data = st.session_state['data']
+    data = st.session_state['data'].tail(252)
 
     # Inputs for Stochastic Oscillator
     k_period = st.slider("Select %K Period", min_value=5, max_value=20, value=14, step=1)

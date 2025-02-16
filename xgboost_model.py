@@ -16,8 +16,7 @@ def train_xgboost():
     st.markdown(f"Stock: {st.session_state['symbol']}")
 
     # Preprocess Data
-    data = preprocess_data(st.session_state['data'].copy())
-    features, target, splits = split_data(data)
+    features, target, _ = split_data(st.session_state['filtered_features'])
 
     # Define XGBoost Model
     model = XGBClassifier(use_label_encoder=False, eval_metric='logloss', random_state=42)

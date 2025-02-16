@@ -1,9 +1,12 @@
-#data_preprocessing.py
+import streamlit as st
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import TimeSeriesSplit
+import shap
+import lightgbm as lgb
+from sklearn.model_selection import TimeSeriesSplit, train_test_split
 from sklearn.preprocessing import StandardScaler
 
+# Technical Indicator Functions
 def calculate_rsi(data, column='Close', window=14):
     delta = data[column].diff()
     gain = (delta.where(delta > 0, 0)).rolling(window=window).mean()
@@ -33,28 +36,111 @@ def calculate_cmf(data, high='High', low='Low', close='Close', volume='Volume', 
     cmf = money_flow_volume.rolling(window=window).sum() / data[volume].rolling(window=window).sum()
     return cmf
 
+def calculate_bollinger_bands(data, column='Close', window=20, std_dev=2):
+    sma = data[column].rolling(window=window).mean()
+    std = data[column].rolling(window=window).std()
+    upper_band = sma + (std_dev * std)
+    lower_band = sma - (std_dev * std)
+    band_width = (upper_band - lower_band) / sma  
+    return upper_band, lower_band, band_width
 
-def preprocess_data(data):
-    data = data.copy()
+def compute_shap_feature_importance(features, target):
+    """Compute SHAP feature importance using LightGBM."""
+    
+    # Train-Test Split
+    X_train, X_test, y_train, y_test = train_test_split(features, target, test_size=0.2, shuffle=False)
+
+    # Train LightGBM Model
+    model = lgb.LGBMClassifier(n_estimators=100, random_state=42)
+    model.fit(X_train, y_train)
+
+    # Compute SHAP Values
+    explainer = shap.Explainer(model, X_train)
+    shap_values = explainer(X_test)
+
+    # Compute Average Feature Importance
+    importance_df = pd.DataFrame({'Feature': features.columns, 'Importance': np.abs(shap_values.values).mean(axis=0)})
+    importance_df = importance_df.sort_values(by='Importance', ascending=False)
+
+    return importance_df
+
+def preprocess_data():
+    """Preprocess stock data and display feature selection UI."""
+    
+    if 'data' not in st.session_state or st.session_state['data'] is None:
+        st.error("Please load the stock data first from the sidebar.")
+        return
+    
+    st.title("Data Preprocessing")
+    st.markdown(f"**Stock: {st.session_state['symbol']}**")
+
+    #Copy Data & Compute Technical Indicators
+    data = st.session_state['data'].copy()
     data['SMA_10'] = data['Close'].rolling(window=10).mean()
     data['SMA_20'] = data['Close'].rolling(window=20).mean()
     data['RSI'] = calculate_rsi(data)
     data['MACD'], data['Signal_Line'] = calculate_macd(data)
     data['ATR'] = calculate_atr(data)
     data['CMF'] = calculate_cmf(data)
+    data['BB_Upper'], data['BB_Lower'], data['BB_Width'] = calculate_bollinger_bands(data)
     data['Momentum'] = data['Close'] - data['Close'].shift(5)
     data['Daily_Return'] = data['Close'].pct_change()
     data.dropna(inplace=True)
-    return data
 
-def split_data(data):
-    features = data[['Close', 'SMA_10', 'SMA_20', 'RSI', 'MACD', 'Signal_Line', 'Momentum', 'Daily_Return', 'ATR', 'CMF', 'Gold_Close', 'GBPUSD']]
+    #Define Features & Target
+    features = data[['Close', 'SMA_10', 'SMA_20', 'RSI', 'MACD', 'Signal_Line', 'Momentum', 'Daily_Return',
+                     'ATR', 'CMF', 'BB_Upper', 'BB_Lower', 'BB_Width', 'Gold_Close', 'GBPUSD']]
     target = (data['Close'].shift(-1) > data['Close']).astype(int)
+
+    #Store Initial Features & Target in Session State
+    st.session_state['features'] = features
+    st.session_state['target'] = target
+
+    #Display Latest 5 Rows
+    # st.subheader("Sample Data (First Few Rows)")
+    # st.dataframe(features.tail(2))
+
+    # Compute SHAP Feature Importance
+    shap_importance = compute_shap_feature_importance(features, target)
+
+    # Display Feature Importance Table
+    st.subheader("Feature Importance (SHAP) Using LightGBM")
+    st.dataframe(shap_importance)
+
+    # Button to Remove Low-Importance Features
+    if st.button("Remove Less Important Features"):
+        threshold = shap_importance['Importance'].median()  
+        selected_features = shap_importance[shap_importance['Importance'] >= threshold]['Feature'].tolist()
+        filtered_features = features[selected_features]
+
+        # Store Filtered Features in Session State
+        st.session_state['filtered_features'] = filtered_features
+        st.success("Less important features removed!")
+
+    # Display Updated Feature Set if Features Were Removed
+    #if 'filtered_features' not in st.session_state or st.session_state['filtered_features'] is None:
+    if 'filtered_features' in st.session_state and st.session_state['filtered_features'] is not None:
+
+        st.subheader("Updated Feature Set (After Removal)")
+        st.dataframe(st.session_state['filtered_features'].tail(2))
+
+
+
+def split_data(proc_data):
+    """Split data into training and testing sets."""
+    if 'filtered_features' not in st.session_state or 'target' not in st.session_state:
+        st.error("Please preprocess data first.")
+        return None, None, None
     
+    features = st.session_state['filtered_features']
+    target = st.session_state['target']
+
+    # Scale Features
     scaler = StandardScaler()
     features_scaled = scaler.fit_transform(features)
-    
+
+    # Time-Series Cross-Validation Splitting
     tscv = TimeSeriesSplit(n_splits=5)
     splits = [(train_idx, test_idx) for train_idx, test_idx in tscv.split(features_scaled)]
-    
+
     return features_scaled, target, splits

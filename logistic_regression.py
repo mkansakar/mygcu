@@ -11,19 +11,20 @@ from sklearn.model_selection import TimeSeriesSplit
 
 
 def logistic_regression():
-    if 'data' not in st.session_state or st.session_state['data'] is None:
-        st.error("Please load the data first from the sidebar on the left")
+    if 'filtered_features' not in st.session_state or st.session_state['filtered_features'] is None:
+        st.error("Please proceed with Data Preprocessing to load the preproceed data.")
         return
     
     st.title("Logistic Regression Price Movement")
     st.markdown(f"Stock: {st.session_state['symbol']}")
     
     # Preprocess data
-    data = preprocess_data(st.session_state['data'].copy())
+    #st.dataframe(st.session_state['filtered_features'].tail(2))
+    #proc_data = st.session_state['filtered_features'].copy()
 
 
 
-    features, target, _ = split_data(data)# Ensure `split_data()` returns clean X, y
+    features, target, _ = split_data(st.session_state['filtered_features']) # Ensure `split_data()` returns clean X, y
 
     features = pd.DataFrame(features)  # Convert features to DataFrame
     target = pd.Series(target).reset_index(drop=True)  # Convert target to Pandas Series   
@@ -60,7 +61,7 @@ def logistic_regression():
     st.write("Next Day Price Movement: **Up**" if prediction[0] == 1 else "Next Day Price Movement: **Down**")
 
 
-    st.write(data.tail(2))
+    #st.write(st.session_state['filtered_features'].tail(2))
 
     with st.expander("What is Logistic Regression?"):
         st.write("""

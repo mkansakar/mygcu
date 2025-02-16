@@ -18,10 +18,12 @@ from random_forest_classification import random_forest_classification
 #from xgboost_model import train_xgboost 
 from stochastic_analysis import stochastic_analysis
 from model_comparison import compare_models
+#from lstm import train_lstm_model
+from data_preprocessing import preprocess_data , split_data
 
 # Set the page title and favicon
 st.set_page_config(
-    page_title="Trade Bot",  # Title that appears on the browser tab
+    page_title="Stock Bot",  # Title that appears on the browser tab
     page_icon="📈",  # Emoji or a path to a favicon image
 )
 
@@ -64,7 +66,7 @@ def footer():
         }
         </style>
         <div class="footer">
-            <p>© 2025 Trade Bot. All rights reserved.</p>
+            <p>© 2025 Stock Bot. All rights reserved.</p>
         </div>
         """,
         unsafe_allow_html=True
@@ -88,17 +90,21 @@ def main():
         st.sidebar.button("Volatility Indicators", on_click=set_page, args=("Volatility Indicators",), key="volatility_button")
         #st.sidebar.button("Spectral Analysis", on_click=set_page, args=("Spectral Analysis",), key="spectral_analysis_button")
         #st.sidebar.button("Time Series Decomposition", on_click=set_page, args=("Decomposition",), key="decomposition_button")
+        
         st.sidebar.button("Stochastic Analysis", on_click=set_page, args=("Stochastic Analysis",), key="stochastic_analysis_button")
 
         #========================Advanced features for admin only=======================
         if st.session_state.role == "admin":
+            st.sidebar.button("Data Preprocessing", on_click=set_page, args=("Preprocessing",), key="data_preprocessing_button")
             #st.sidebar.button("ARIMA Model", on_click=set_page, args=("ARIMA Model",), key="arima_button")
             #st.sidebar.button("SARIMA Model", on_click=set_page, args=("SARIMA Model",), key="sarima_button")
             st.sidebar.button("Logistic Regression Model", on_click=set_page, args=("Logistic Regression",), key="logistic_regression_button")
             st.sidebar.button("SVM Model", on_click=set_page, args=("SVM",), key="svm_button")
             st.sidebar.button("Random Forest Model", on_click=set_page, args=("Random Forest",), key="random_forest_button")
             #st.sidebar.button("XGBoost Model", on_click=set_page, args=("XGBoost",), key="xgboost_button")
+            #st.sidebar.button("LSTM Model", on_click=set_page, args=("LSTM",), key="lstm_button")
             st.sidebar.button("Model Comparison", on_click=set_page, args=("Model Comparison",), key="model_comparison_button")
+            
         #================================================================================
 
         st.sidebar.button("Feedback", on_click=set_page, args=("Feedback",), key="feedback_button")
@@ -123,6 +129,8 @@ def main():
             stochastic_analysis()
         #elif st.session_state.page == "Spectral Analysis":
         #    spectral_analysis()
+        elif st.session_state.page == "Preprocessing":
+            preprocess_data()
         # elif st.session_state.page == "ARIMA Model":
         #     arima_model()
         elif st.session_state.page == "Random Forest":
@@ -133,6 +141,8 @@ def main():
             svm_model()
         # elif st.session_state.page == "XGBoost":
         #     train_xgboost()
+        # elif st.session_state.page == "LSTM":
+        #      train_lstm_model()
         elif st.session_state.page == "Model Comparison":
             compare_models()        
         elif st.session_state.page == "Feedback":
