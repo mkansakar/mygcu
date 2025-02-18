@@ -40,7 +40,7 @@ def arima_model():
     """
     Apply the ARIMA model to predict stock prices with enhanced features, including automatic parameter selection.
     """
-    if 'data' not in st.session_state or st.session_state['data'] is None:
+    if 'session_data' not in st.session_state or st.session_state['session_data'] is None:
         st.error("Please load the data first from the sidebar on the left.")
         return
 
@@ -50,7 +50,7 @@ def arima_model():
     # Load the data
     scaler = MinMaxScaler(feature_range=(50, 500))
     
-    data = st.session_state['data']
+    data = st.session_state['session_data'].copy()
     data["Volume"] = scaler.fit_transform(data[["Volume"]])
     #st.write(data.tail(1)) 
     column = st.selectbox("Select a column for ARIMA modeling", data.columns, index=data.columns.get_loc("Close"))

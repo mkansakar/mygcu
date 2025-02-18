@@ -22,13 +22,21 @@ def load_data():
     with col3:
         end_date = st.date_input("End Date", value=end_date_default, max_value=end_date_default)
 
-    # if (end_date - start_date).days > 365:
-    #     st.warning("The date range cannot exceed 365 days. Please adjust the dates.")
-    #     return
-    
-    if st.button("Load Data"):
+    # Validate date range
+    date_range_valid = (end_date - start_date).days >= 365
+
+    if start_date >= end_date:
+        st.error("Start Date must be before End Date. Please adjust the dates.")
+        date_range_valid = False
+    elif not date_range_valid:
+        st.warning("The date range must be at least 365 days. Please adjust the dates.")
+
+    # "Load Data" button is always shown but only enabled when the date range is valid
+    load_button = st.button("Load Data", disabled=not date_range_valid)
+
+    if load_button and date_range_valid:
         try:
-            st.session_state['data'] = None
+            st.session_state['session_data'] = None
             st.session_state['filtered_features'] = None
             stock = yf.Ticker(stock_symbol)
             full_name = stock.info.get("longName", "N/A")
@@ -61,7 +69,7 @@ def load_data():
                 st.write(data.tail(2))
 
                 #st.session_state['data'] = data.iloc[:, :-2]
-                st.session_state['data'] = data.drop(columns=['Dividends', 'Stock Splits'], errors='ignore')
+                st.session_state['session_data'] = data.drop(columns=['Dividends', 'Stock Splits'], errors='ignore')
                 #data = data.drop(columns=['Dividends', 'Stock Splits'], errors='ignore')
                 st.session_state['symbol'] = full_name
                 st.session_state['stock_symbol'] = stock_symbol
@@ -71,6 +79,7 @@ def load_data():
 
             else:
                 st.warning(f"No data found for {stock_symbol} in the specified date range.")
+                #st.session_state['data'] = None
         except Exception as e:
             st.error(f"Error downloading data: {e}")
 

@@ -69,15 +69,15 @@ def preprocess_data():
 
         """Preprocess stock data and display feature selection UI."""
         
-        if 'data' not in st.session_state or st.session_state['data'] is None:
-            st.error("Please load the stock data first from the sidebar.")
+        if 'session_data' not in st.session_state or st.session_state['session_data'] is None:
+            st.error("Please load the data first from the sidebar on the left.")
             return
         
         st.title("Data Preprocessing")
         st.markdown(f"**Stock: {st.session_state['symbol']}**")
 
         #Copy Data & Compute Technical Indicators
-        data = st.session_state['data'].copy()
+        data = st.session_state['session_data'].copy()
         data['SMA_10'] = data['Close'].rolling(window=10).mean()
         data['SMA_20'] = data['Close'].rolling(window=20).mean()
         data['RSI'] = calculate_rsi(data)

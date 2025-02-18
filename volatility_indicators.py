@@ -29,7 +29,7 @@ def display_volatility_indicators():
     """
     Streamlit interface for displaying volatility indicators.
     """
-    if 'data' not in st.session_state or st.session_state['data'] is None:
+    if 'session_data' not in st.session_state or st.session_state['session_data'] is None:
         st.error("Please load the data first from the sidebar on the left.")
         return
 
@@ -37,7 +37,7 @@ def display_volatility_indicators():
     st.markdown(f"Stock: {st.session_state['symbol']}")
     # Select column and window size
     #data = st.session_state['data']
-    data = st.session_state['data'].tail(252)
+    data = st.session_state['session_data'].tail(180)
     st.subheader("Bollinger Bands")
     window_bb = st.slider("Select Window Size for Bollinger Bands", min_value=5, max_value=50, value=20, step=1)
 
