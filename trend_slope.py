@@ -9,7 +9,7 @@ def compute_trend_slope():
     """
     Compute the slope of trend lines using linear regression on rolling windows.
     """
-    if 'data' not in st.session_state or st.session_state['data'] is None:
+    if 'session_data' not in st.session_state or st.session_state['session_data'] is None:
         st.error("Please load the data first from the sidebar on the left.")
         return
 
@@ -17,7 +17,7 @@ def compute_trend_slope():
     st.markdown(f"Stock: {st.session_state['symbol']}")
     # Select column for slope calculation
     #data = st.session_state['data']
-    data = st.session_state['data'].tail(252)
+    data = st.session_state['session_data'].tail(180)
     column = st.selectbox("Select a column for trend slope calculation", data.columns, index=data.columns.get_loc("Close"))
 
     # Rolling window size input

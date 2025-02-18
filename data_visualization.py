@@ -8,6 +8,10 @@ def identify_candlestick_pattern(data):
     """
     Determines the next day's price trend based on the last candlestick pattern.
     """
+    # if 'data' not in st.session_state or st.session_state['data'] is None:
+    #     st.error("Please load the data first from the sidebar on the left.")
+    #     return
+    
     last_candle = data.iloc[-1]
 
     # Engulfing Pattern (Bullish)
@@ -30,15 +34,15 @@ def identify_candlestick_pattern(data):
 
     return "No Clear Pattern - Market Indecision"
 
-def predict_next_day_trend():
+def predict_next_day_trend(data):
     """
     Display the next day's expected price trend based on candlestick analysis.
     """
-    if 'data' not in st.session_state or st.session_state['data'] is None:
-        st.error("Please load the data first from the sidebar on the left.")
-        return
+    # if 'data' not in st.session_state or st.session_state['data'] is None:
+    #     st.error("Please load the data first from the sidebar on the left.")
+    #     return
 
-    data = st.session_state['data']
+    #data = st.session_state['data']
     
     # Ensure there are at least two candles
     if len(data) < 2:
@@ -56,11 +60,11 @@ def visualize_data():
     """
     Visualize stock data as a candlestick chart.
     """
-    if 'data' not in st.session_state or st.session_state['data'] is None:
+    if 'session_data' not in st.session_state or st.session_state['session_data'] is None:
         st.error("Please load the data first from the sidebar on the left.")
         return
     
-    data = st.session_state['data']
+    data = st.session_state['session_data'].copy()
     
     # Ensure the data has at least 30 days of records
     if len(data) < 30:
@@ -68,7 +72,7 @@ def visualize_data():
         return
     
     # Slice the last 30 days of data
-    last_30_days = data.tail(252)    
+    last_30_days = data.tail(30)    
     
     st.title("Candlestick Chart")
     st.markdown(f"Stock: {st.session_state['symbol']}")
@@ -98,7 +102,7 @@ def visualize_data():
 
         st.plotly_chart(fig)
 
-        predict_next_day_trend()
+        predict_next_day_trend(data)
     else:
         st.error("The dataset does not contain the required columns for a candlestick chart.")
 
