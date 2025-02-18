@@ -65,65 +65,83 @@ def compute_shap_feature_importance(features, target):
     return importance_df
 
 def preprocess_data():
-    """Preprocess stock data and display feature selection UI."""
-    
-    if 'data' not in st.session_state or st.session_state['data'] is None:
-        st.error("Please load the stock data first from the sidebar.")
-        return
-    
-    st.title("Data Preprocessing")
-    st.markdown(f"**Stock: {st.session_state['symbol']}**")
+    try:
 
-    #Copy Data & Compute Technical Indicators
-    data = st.session_state['data'].copy()
-    data['SMA_10'] = data['Close'].rolling(window=10).mean()
-    data['SMA_20'] = data['Close'].rolling(window=20).mean()
-    data['RSI'] = calculate_rsi(data)
-    data['MACD'], data['Signal_Line'] = calculate_macd(data)
-    data['ATR'] = calculate_atr(data)
-    data['CMF'] = calculate_cmf(data)
-    data['BB_Upper'], data['BB_Lower'], data['BB_Width'] = calculate_bollinger_bands(data)
-    data['Momentum'] = data['Close'] - data['Close'].shift(5)
-    data['Daily_Return'] = data['Close'].pct_change()
-    data.dropna(inplace=True)
+        """Preprocess stock data and display feature selection UI."""
+        
+        if 'data' not in st.session_state or st.session_state['data'] is None:
+            st.error("Please load the stock data first from the sidebar.")
+            return
+        
+        st.title("Data Preprocessing")
+        st.markdown(f"**Stock: {st.session_state['symbol']}**")
 
-    #Define Features & Target
-    features = data[['Close', 'SMA_10', 'SMA_20', 'RSI', 'MACD', 'Signal_Line', 'Momentum', 'Daily_Return',
-                     'ATR', 'CMF', 'BB_Upper', 'BB_Lower', 'BB_Width', 'Gold_Close', 'GBPUSD']]
-    target = (data['Close'].shift(-1) > data['Close']).astype(int)
+        #Copy Data & Compute Technical Indicators
+        data = st.session_state['data'].copy()
+        data['SMA_10'] = data['Close'].rolling(window=10).mean()
+        data['SMA_20'] = data['Close'].rolling(window=20).mean()
+        data['RSI'] = calculate_rsi(data)
+        data['MACD'], data['Signal_Line'] = calculate_macd(data)
+        data['ATR'] = calculate_atr(data)
+        data['CMF'] = calculate_cmf(data)
+        data['BB_Upper'], data['BB_Lower'], data['BB_Width'] = calculate_bollinger_bands(data)
+        data['Momentum'] = data['Close'] - data['Close'].shift(5)
+        data['Daily_Return'] = data['Close'].pct_change()
+        data.dropna(inplace=True)
 
-    #Store Initial Features & Target in Session State
-    st.session_state['features'] = features
-    st.session_state['target'] = target
+        #Define Features & Target
+        features = data[['Close', 'SMA_10', 'SMA_20', 'RSI', 'MACD', 'Signal_Line', 'Momentum', 'Daily_Return',
+                        'ATR', 'CMF', 'BB_Upper', 'BB_Lower', 'BB_Width', 'Gold_Close', 'GBPUSD']]
+        target = (data['Close'].shift(-1) > data['Close']).astype(int)
 
-    #Display Latest 5 Rows
-    # st.subheader("Sample Data (First Few Rows)")
-    # st.dataframe(features.tail(2))
+        # Calculate the ratio of 0s and 1s
+        target_counts = target.value_counts()
+        total = len(target)
 
-    # Compute SHAP Feature Importance
-    shap_importance = compute_shap_feature_importance(features, target)
+        # Compute ratios
+        ratio_0 = target_counts[0] / total
+        ratio_1 = target_counts[1] / total
 
-    # Display Feature Importance Table
-    st.subheader("Feature Importance (SHAP) Using LightGBM")
-    st.dataframe(shap_importance)
+        #Store Initial Features & Target in Session State
+        st.session_state['features'] = features
+        st.session_state['target'] = target
 
-    # Button to Remove Low-Importance Features
-    if st.button("Remove Less Important Features"):
-        threshold = shap_importance['Importance'].median()  
-        selected_features = shap_importance[shap_importance['Importance'] >= threshold]['Feature'].tolist()
-        filtered_features = features[selected_features]
+        #Display Latest 5 Rows
+        # st.subheader("Sample Data (First Few Rows)")
+        # st.dataframe(features.tail(2))
 
-        # Store Filtered Features in Session State
-        st.session_state['filtered_features'] = filtered_features
-        st.success("Less important features removed!")
+        # Compute SHAP Feature Importance
+        shap_importance = compute_shap_feature_importance(features, target)
 
-    # Display Updated Feature Set if Features Were Removed
-    #if 'filtered_features' not in st.session_state or st.session_state['filtered_features'] is None:
-    if 'filtered_features' in st.session_state and st.session_state['filtered_features'] is not None:
+        # Display Feature Importance Table
+        st.subheader("Feature Importance (SHAP) Using LightGBM")
+        st.dataframe(shap_importance)
 
-        st.subheader("Updated Feature Set (After Removal)")
-        st.dataframe(st.session_state['filtered_features'].tail(2))
+        # Button to Remove Low-Importance Features
+        if st.button("Remove Less Important Features"):
+            threshold = shap_importance['Importance'].median()  
+            selected_features = shap_importance[shap_importance['Importance'] >= threshold]['Feature'].tolist()
+            filtered_features = features[selected_features]
 
+            # Store Filtered Features in Session State
+            st.session_state['filtered_features'] = filtered_features
+            st.success("Less important features removed!")
+
+        # Display Updated Feature Set if Features Were Removed
+        #if 'filtered_features' not in st.session_state or st.session_state['filtered_features'] is None:
+        if 'filtered_features' in st.session_state and st.session_state['filtered_features'] is not None:
+
+            st.subheader("Updated Feature Set (After Removal)")
+            st.dataframe(st.session_state['filtered_features'].tail(2))
+
+            st.write(f"Ratio of 0s (Price Down): {ratio_0:.2f} ({target_counts[0]} occurrences)")
+            st.write(f"Ratio of 1s (Price Up): {ratio_1:.2f} ({target_counts[1]} occurrences)")
+
+
+    except KeyError as ke:
+        st.error(f"Missing data column: {ke}. Ensure the dataset contains 'Close' prices.")
+    except Exception as e:
+        st.error(f"An unexpected error occurred during data preprocessing: {e}")
 
 
 def split_data(proc_data):

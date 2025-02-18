@@ -20,7 +20,7 @@ def svm_model():
     features, target, _ = split_data(st.session_state['filtered_features'])
 
     # Define SVM Model
-    model = SVC(kernel='rbf', C=1.0, probability=True)
+    model = SVC(kernel='rbf', C=1e3, probability=True, gamma=0.1, random_state=42)
 
     # Implement Cross-Validation (Time Series Split)
     tscv = TimeSeriesSplit(n_splits=5)
