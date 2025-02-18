@@ -50,13 +50,22 @@ def compute_shap_feature_importance(features, target):
     # Train-Test Split
     X_train, X_test, y_train, y_test = train_test_split(features, target, test_size=0.2, shuffle=False)
 
+    X_test = X_test[X_train.columns]
+    X_train.replace([np.inf, -np.inf], np.nan, inplace=True)
+    X_test.replace([np.inf, -np.inf], np.nan, inplace=True)
+
+    # Fill NaN values with column mean (or use a more robust imputation method)
+    X_train.fillna(X_train.mean(), inplace=True)
+    X_test.fillna(X_train.mean(), inplace=True) 
+
     # Train LightGBM Model
     model = lgb.LGBMClassifier(n_estimators=100, random_state=42)
     model.fit(X_train, y_train)
 
     # Compute SHAP Values
-    explainer = shap.Explainer(model, X_train)
-    shap_values = explainer(X_test)
+  
+    explainer = shap.TreeExplainer(model, X_train)
+    shap_values = explainer(X_test,check_additivity=False)
 
     # Compute Average Feature Importance
     importance_df = pd.DataFrame({'Feature': features.columns, 'Importance': np.abs(shap_values.values).mean(axis=0)})
