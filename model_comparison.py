@@ -26,10 +26,10 @@ def compare_models():
     
     # Define individual models
     models = {
-        "Logistic Regression": LogisticRegression(),
+        "Logistic Regression": LogisticRegression(max_iter=1000),
         "Random Forest": RandomForestClassifier(n_estimators=100, random_state=42),
         #
-        "SVM": SVC(probability=True)  # Enable probability for Voting Classifier
+        "SVM": SVC(kernel='rbf', C=1e3, probability=True, gamma=0.1, random_state=42)  # Enable probability for Voting Classifier
     }
     
     # Train-Test Split for Model Evaluation
@@ -84,12 +84,13 @@ def compare_models():
     st.subheader("Model Performance Comparison")
     st.dataframe(results_df)
 
-    # Visualization
-    # plt.figure(figsize=(6, 4))
-    # #sns.barplot(x="Model", y="Accuracy", data=results_df, palette="viridis")
-    # sns.barplot(x="Model", y="Accuracy", data=results_df, legend=False)
-    # plt.xticks(rotation=45)
-    # plt.title("Model Accuracy Comparison")
-    # plt.ylabel("Accuracy")
-    # plt.xlabel("Model")
-    # st.pyplot(plt)
+
+    with st.expander("About Model Performance Comparison"):
+            st.write("""
+            Model performance comparison is a critical step in evaluating and selecting the best predictive model for a given task. The goal is to assess how different machine learning models perform against each other using key evaluation metrics such as accuracy, precision, recall, and F1-score. These metrics help determine which model provides the most reliable predictions while balancing trade-offs between false positives and false negatives.
+            - Accuracy – Measures the proportion of correctly classified instances out of all predictions. Higher accuracy suggests better overall model performance, but it can be misleading for imbalanced datasets.
+            - Precision – Represents the proportion of true positive predictions among all predicted positives. High precision indicates fewer false positives, which is critical in applications where false alarms must be minimized.
+            - Recall (Sensitivity) – Measures how well the model identifies actual positive cases. High recall is crucial in situations where missing a positive case (false negative) is costly.
+            - F1-score – A harmonic mean of precision and recall. It provides a balanced measure, especially when dealing with imbalanced classes.
+                     
+            """) 

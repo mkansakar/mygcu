@@ -10,7 +10,7 @@ def spectral_analysis():
     Perform spectral analysis on stock prices to identify dominant frequencies.
     """
 
-    if 'data' not in st.session_state:
+    if 'data' not in st.session_state or st.session_state['data'] is None:
         st.error("Please load the data first from the sidebar on the left.")
         return
 

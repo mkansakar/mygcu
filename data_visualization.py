@@ -34,8 +34,8 @@ def predict_next_day_trend():
     """
     Display the next day's expected price trend based on candlestick analysis.
     """
-    if 'data' not in st.session_state:
-        st.error("Please load the data first.")
+    if 'data' not in st.session_state or st.session_state['data'] is None:
+        st.error("Please load the data first from the sidebar on the left.")
         return
 
     data = st.session_state['data']
@@ -56,7 +56,7 @@ def visualize_data():
     """
     Visualize stock data as a candlestick chart.
     """
-    if 'data' not in st.session_state:
+    if 'data' not in st.session_state or st.session_state['data'] is None:
         st.error("Please load the data first from the sidebar on the left.")
         return
     

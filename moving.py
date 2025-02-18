@@ -37,9 +37,11 @@ def moving_indicators():
     """
     
 
-    if 'data' not in st.session_state:
+    if 'data' not in st.session_state or st.session_state['data'] is None:
         st.error("Please load the data first from the sidebar on the left.")
         return
+    
+    
     st.title("Moving Averages and Indicators")
     st.markdown(f"Stock: {st.session_state['symbol']}")
     data = st.session_state['data'].tail(252)

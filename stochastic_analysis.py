@@ -31,7 +31,7 @@ def stochastic_analysis():
     Perform stochastic analysis and visualize %K and %D indicators.
     """
 
-    if 'data' not in st.session_state:
+    if 'data' not in st.session_state or st.session_state['data'] is None:
         st.error("Please load the data first from the sidebar on the left.")
         return
 
