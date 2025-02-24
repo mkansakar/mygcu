@@ -8,12 +8,39 @@ from sklearn.preprocessing import StandardScaler
 
 # Technical Indicator Functions
 def calculate_rsi(data, column='Close', window=14):
-    delta = data[column].diff()
-    gain = (delta.where(delta > 0, 0)).rolling(window=window).mean()
-    loss = (-delta.where(delta < 0, 0)).rolling(window=window).mean()
-    rs = gain / loss
-    rsi = 100 - (100 / (1 + rs))
-    return rsi
+    try:
+        # Ensure data is a DataFrame
+        if not isinstance(data, pd.DataFrame):
+            raise ValueError("Input data must be a pandas DataFrame.")
+
+        # Ensure the specified column exists
+        if column not in data.columns:
+            raise ValueError(f"Column '{column}' not found in DataFrame.")
+
+        # Ensure the DataFrame has enough rows for RSI calculation
+        if len(data) < window:
+            raise ValueError(f"Not enough data points to compute RSI (minimum required: {window}).")
+
+        # Calculate RSI
+        delta = data[column].diff()
+        gain = (delta.where(delta > 0, 0)).rolling(window=window).mean()
+        loss = (-delta.where(delta < 0, 0)).rolling(window=window).mean()
+
+        # Prevent division by zero
+        loss.replace(0, 1e-10, inplace=True)  # Small value to avoid divide-by-zero
+
+        rs = gain / loss
+        rsi = 100 - (100 / (1 + rs))
+
+        return rsi
+
+    except ValueError as ve:
+        print(f"ValueError: {ve}")
+        return pd.Series(dtype="float64")  # Return empty series on failure
+
+    except Exception as e:
+        print(f"Unexpected error in RSI calculation: {e}")
+        return pd.Series(dtype="float64")
 
 def calculate_macd(data, column='Close', short_window=12, long_window=26, signal_window=9):
     short_ema = data[column].ewm(span=short_window, adjust=False).mean()
@@ -37,41 +64,98 @@ def calculate_cmf(data, high='High', low='Low', close='Close', volume='Volume', 
     return cmf
 
 def calculate_bollinger_bands(data, column='Close', window=20, std_dev=2):
-    sma = data[column].rolling(window=window).mean()
-    std = data[column].rolling(window=window).std()
-    upper_band = sma + (std_dev * std)
-    lower_band = sma - (std_dev * std)
-    band_width = (upper_band - lower_band) / sma  
-    return upper_band, lower_band, band_width
+
+    try:
+        # Ensure data is a DataFrame
+        if not isinstance(data, pd.DataFrame):
+            raise ValueError("Input data must be a pandas DataFrame.")
+
+        # Ensure the specified column exists
+        if column not in data.columns:
+            raise ValueError(f"Column '{column}' not found in DataFrame.")
+
+        # Ensure the DataFrame has enough rows for Bollinger Band calculation
+        if len(data) < window:
+            raise ValueError(f"Not enough data points to compute Bollinger Bands (minimum required: {window}).")
+
+        # Calculate Bollinger Bands
+        sma = data[column].rolling(window=window).mean()
+        std = data[column].rolling(window=window).std()
+        upper_band = sma + (std_dev * std)
+        lower_band = sma - (std_dev * std)
+        band_width = (upper_band - lower_band) / sma  # Bandwidth as a percentage
+        return upper_band, lower_band, band_width
+
+    except Exception as e:
+        print(f"An error occurred in Bollinger Bands calculation: {e}")
+        return pd.Series(dtype="float64"), pd.Series(dtype="float64"), pd.Series(dtype="float64")
 
 def compute_shap_feature_importance(features, target):
     """Compute SHAP feature importance using LightGBM."""
     
-    # Train-Test Split
-    X_train, X_test, y_train, y_test = train_test_split(features, target, test_size=0.2, shuffle=False)
+    try:
+        # Validate input data types
+        if not isinstance(features, pd.DataFrame):
+            raise ValueError("Features must be a pandas DataFrame.")
+        if not isinstance(target, (pd.Series, np.ndarray)):
+            raise ValueError("Target must be a pandas Series or a numpy array.")
 
-    X_test = X_test[X_train.columns]
-    X_train.replace([np.inf, -np.inf], np.nan, inplace=True)
-    X_test.replace([np.inf, -np.inf], np.nan, inplace=True)
+        # Ensure features and target have matching rows
+        if features.shape[0] != len(target):
+            raise ValueError(f"Feature-target mismatch: Features have {features.shape[0]} rows, but target has {len(target)} rows.")
 
-    # Fill NaN values with column mean (or use a more robust imputation method)
-    X_train.fillna(X_train.mean(), inplace=True)
-    X_test.fillna(X_train.mean(), inplace=True) 
+        # Train-Test Split
+        try:
+            X_train, X_test, y_train, y_test = train_test_split(features, target, test_size=0.2, shuffle=False)
+        except Exception as e:
+            raise RuntimeError(f"Error during train-test split: {e}")
 
-    # Train LightGBM Model
-    model = lgb.LGBMClassifier(n_estimators=100, random_state=42)
-    model.fit(X_train, y_train)
+        # Ensure X_test matches X_train columns
+        X_test = X_test[X_train.columns]
 
-    # Compute SHAP Values
-  
-    explainer = shap.TreeExplainer(model, X_train)
-    shap_values = explainer(X_test,check_additivity=False)
+        # Handle missing and infinite values
+        X_train.replace([np.inf, -np.inf], np.nan, inplace=True)
+        X_test.replace([np.inf, -np.inf], np.nan, inplace=True)
+        X_train.fillna(X_train.mean(), inplace=True)
+        X_test.fillna(X_train.mean(), inplace=True)  # Ensure X_test uses X_train mean
 
-    # Compute Average Feature Importance
-    importance_df = pd.DataFrame({'Feature': features.columns, 'Importance': np.abs(shap_values.values).mean(axis=0)})
-    importance_df = importance_df.sort_values(by='Importance', ascending=False)
+        # Train LightGBM Model
+        try:
+            model = lgb.LGBMClassifier(n_estimators=100, random_state=42)
+            model.fit(X_train, y_train)
+        except Exception as e:
+            raise RuntimeError(f"Error training LightGBM model: {e}")
 
-    return importance_df
+        # Compute SHAP Values
+        try:
+            explainer = shap.TreeExplainer(model, X_train)
+            shap_values = explainer(X_test, check_additivity=False)
+        except Exception as e:
+            raise RuntimeError(f"Error computing SHAP values: {e}")
+
+        # Compute Average Feature Importance
+        try:
+            importance_df = pd.DataFrame({
+                'Feature': features.columns,
+                'Importance': np.abs(shap_values.values).mean(axis=0)
+            })
+            importance_df = importance_df.sort_values(by='Importance', ascending=False)
+        except Exception as e:
+            raise RuntimeError(f"Error computing feature importance: {e}")
+
+        return importance_df
+
+    except ValueError as ve:
+        print(f"ValueError: {ve}")
+        return pd.DataFrame(columns=['Feature', 'Importance'])  # Return empty DataFrame on failure
+
+    except RuntimeError as re:
+        print(f"RuntimeError: {re}")
+        return pd.DataFrame(columns=['Feature', 'Importance'])  # Return empty DataFrame on failure
+
+    except Exception as e:
+        print(f"Unexpected error in SHAP feature importance computation: {e}")
+        return pd.DataFrame(columns=['Feature', 'Importance'])
 
 def preprocess_data():
     try:
@@ -79,7 +163,7 @@ def preprocess_data():
         """Preprocess stock data and display feature selection UI."""
         
         if 'session_data' not in st.session_state or st.session_state['session_data'] is None:
-            st.error("Please load the data first from the sidebar on the left.")
+            st.error("Please use Load Data button on left menu to load the data first.")
             return
         
         st.title("Data Preprocessing")
@@ -154,20 +238,24 @@ def preprocess_data():
 
 
 def split_data(proc_data):
-    """Split data into training and testing sets."""
-    if 'filtered_features' not in st.session_state or 'target' not in st.session_state:
-        st.error("Please preprocess data first.")
+    try:
+        """Split data into training and testing sets."""
+        if 'filtered_features' not in st.session_state or 'target' not in st.session_state:
+            st.error("Please preprocess data first.")
+            return None, None, None
+        
+        features = st.session_state['filtered_features']
+        target = st.session_state['target']
+
+        # Scale Features
+        scaler = StandardScaler()
+        features_scaled = scaler.fit_transform(features)
+
+        # Time-Series Cross-Validation Splitting
+        tscv = TimeSeriesSplit(n_splits=5)
+        splits = [(train_idx, test_idx) for train_idx, test_idx in tscv.split(features_scaled)]
+
+        return features_scaled, target, splits
+    except Exception as e:
+        st.error(f"An unexpected error occurred in data splitting: {e}")
         return None, None, None
-    
-    features = st.session_state['filtered_features']
-    target = st.session_state['target']
-
-    # Scale Features
-    scaler = StandardScaler()
-    features_scaled = scaler.fit_transform(features)
-
-    # Time-Series Cross-Validation Splitting
-    tscv = TimeSeriesSplit(n_splits=5)
-    splits = [(train_idx, test_idx) for train_idx, test_idx in tscv.split(features_scaled)]
-
-    return features_scaled, target, splits

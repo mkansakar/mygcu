@@ -1,4 +1,3 @@
-#moving.py
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -6,7 +5,7 @@ import plotly.graph_objects as go
 
 def calculate_rsi(data, column='Close', window=14):
     """
-    Calculate the Relative Strength Index (RSI) without modifying the original dataset.
+    Calculate the Relative Strength Index (RSI).
     """
     delta = data[column].diff()
     gain = (delta.where(delta > 0, 0)).rolling(window=window).mean()
@@ -17,7 +16,7 @@ def calculate_rsi(data, column='Close', window=14):
 
 def calculate_macd(data, column='Close', short_window=12, long_window=26, signal_window=9):
     """
-    Calculate the MACD and Signal Line without modifying the original dataset.
+    Calculate the MACD and Signal Line.
     """
     short_ema = data[column].ewm(span=short_window, adjust=False).mean()
     long_ema = data[column].ewm(span=long_window, adjust=False).mean()
@@ -25,89 +24,92 @@ def calculate_macd(data, column='Close', short_window=12, long_window=26, signal
     signal_line = macd.ewm(span=signal_window, adjust=False).mean()
     return macd, signal_line
 
-def calculate_moving_averages(data, column='Close', windows=[5, 15, 30]):
+# def predict_next_day_trend(rsi, macd, signal_line):
+#     """
+#     Predict next day's trend using RSI and MACD.
+#     """
+#     latest_rsi = rsi.iloc[-1]
+#     latest_macd = macd.iloc[-1]
+#     latest_signal = signal_line.iloc[-1]
+
+#     if latest_rsi < 30 and latest_macd > latest_signal:
+#         return "Uptrend (RSI Oversold & MACD Bullish)"
+#     elif latest_rsi > 70 and latest_macd < latest_signal:
+#         return "Downtrend (RSI Overbought & MACD Bearish)"
+#     elif latest_macd > latest_signal:
+#         return "Uptrend (MACD Bullish Crossover)"
+#     elif latest_macd < latest_signal:
+#         return "Downtrend (MACD Bearish Crossover)"
+#     else:
+#         return "Neutral"
+
+def predict_rsi_trend(latest_rsi):
     """
-    Calculate moving averages for the specified windows without modifying the original dataset.
+    Predict trend based on RSI alone.
     """
-    return {f"SMA_{window}": data[column].rolling(window=window).mean() for window in windows}
+    if latest_rsi < 30:
+        return "Uptrend (RSI Oversold)"
+    elif latest_rsi > 70:
+        return "Downtrend (RSI Overbought)"
+    else:
+        return "Neutral (RSI in Normal Range)"
+
+def predict_macd_trend(latest_macd, latest_signal):
+    """
+    Predict trend based on MACD crossover.
+    """
+    if latest_macd > latest_signal:
+        return "Uptrend (MACD Bullish Crossover)"
+    elif latest_macd < latest_signal:
+        return "Downtrend (MACD Bearish Crossover)"
+    else:
+        return "Neutral (MACD No Crossover)"
+
 
 def moving_indicators():
     """
-    Display combined moving averages, RSI, and MACD plots without modifying the original dataset.
+    Display moving averages, RSI, and MACD plots with next-day trend prediction.
     """
-    
-
-    if 'session_data' not in st.session_state or st.session_state['session_data'] is None:
-        st.error("Please load the data first from the sidebar on the left.")
-        return
-    
-    
-    st.title("Moving Averages and Indicators")
-    st.markdown(f"Stock: {st.session_state['symbol']}")
-    data = st.session_state['session_data'].tail(252)
-    #last_30_days = data.tail(60)
-    # Moving Averages
-    st.header("Moving Averages")
-    windows = st.multiselect("Select Moving Average Periods", [5, 15, 30], default=[5, 15, 30])
-    if windows:
-        moving_avg = calculate_moving_averages(data, windows=windows)
-        fig = go.Figure()
+    try:    
+        if 'session_data' not in st.session_state or st.session_state['session_data'] is None:
+                st.error("Please use Load Data button on left menu to load the data first.")
+                return
         
-        # Add original Close prices to the graph
-        fig.add_trace(go.Scatter(
-            x=data.index, y=data['Close'], mode='lines', name='Close',
-            line=dict(color='blue', width=2)
-        ))
+        st.title("Moving Averages and Indicators")
+        st.markdown(f"Stock: {st.session_state['symbol']}")
         
-        # Add moving averages to the graph
-        for period, avg in moving_avg.items():
-            fig.add_trace(go.Scatter(
-                x=data.index, y=avg, mode='lines', name=f"{period}",
-                line=dict(width=2)
-            ))
+        data = st.session_state['session_data'].tail(252)
 
-        # Configure layout
-        fig.update_layout(
-            title="Combined Moving Averages",
-            xaxis_title="Date",
-            yaxis_title="Price",
-            legend_title="Legend",
-            template="plotly_white"
-        )
-        st.plotly_chart(fig)
-    with st.expander("What is Moving Averages?"):
-            st.write("""
-                A moving average in stock prices is a statistical measure used to analyze and smooth out price data by creating a continuously updated average price over a specific period.\n
-                Bullish Signal: When the short-term average (5-day) crosses above the medium or long-term average (15-day or 30-day), it indicates rising momentum and a potential buy opportunity.\n
-                Bearish Signal: When the short-term average crosses below the longer averages, it signals weakening momentum and a potential sell opportunity.
-            """)  
-    # RSI
-    st.header("Relative Strength Index (RSI)")
-    rsi_window = st.slider("Select RSI Window", 10, 30, 14)
-    rsi = calculate_rsi(data, window=rsi_window)
-    st.line_chart(pd.DataFrame({"RSI": rsi}, index=data.index))
-    with st.expander("What is RSI?"):
-            st.write("""
-                The RSI is a momentum oscillator that measures the speed and magnitude of recent price changes to evaluate overbought or oversold conditions in a stock or other financial instrument.\n
-                If a stock has an RSI of 80, it is overbought, and traders may expect a price correction.\n
-                If a stock has an RSI of 25, it is oversold, and traders might anticipate a price recovery.\n
-                If RSI moves from below 30 to above 30, it can signal the end of a downtrend and the beginning of an upward move.
-            """)  
-    
-    # MACD
-    st.header("MACD")
-    short_window = st.slider("Short EMA Window", 5, 20, 12)
-    long_window = st.slider("Long EMA Window", 20, 50, 26)
-    signal_window = st.slider("Signal Line Window", 5, 20, 9)
-    macd, signal_line = calculate_macd(data, short_window=short_window, long_window=long_window, signal_window=signal_window)
-    macd_df = pd.DataFrame({"MACD": macd, "Signal Line": signal_line}, index=data.index)
-    st.line_chart(macd_df)
+        # RSI Calculation
+        st.header("Relative Strength Index (RSI)")
+        rsi_window = st.slider("Select RSI Window", 10, 30, 14)
+        rsi = calculate_rsi(data, window=rsi_window)
+        st.line_chart(pd.DataFrame({"RSI": rsi}, index=data.index))
+        next_day_rsi_trend = predict_rsi_trend(rsi.iloc[-1])
+        st.write(f"**Predicted Next Day Trend: {next_day_rsi_trend}**")
 
-    #st.info("Note: These plots are based on calculated values and do not modify the original dataset.")
- 
-    with st.expander("What is MACD?"):
+        # MACD Calculation
+        st.header("MACD")
+        short_window = st.slider("Short EMA Window", 5, 20, 12)
+        long_window = st.slider("Long EMA Window", 20, 50, 26)
+        signal_window = st.slider("Signal Line Window", 5, 20, 9)
+        macd, signal_line = calculate_macd(data, short_window=short_window, long_window=long_window, signal_window=signal_window)
+        macd_df = pd.DataFrame({"MACD": macd, "Signal Line": signal_line}, index=data.index)
+        st.line_chart(macd_df)
+
+        # Predict Next Day Trend
+        # next_day_trend = predict_macd_trend(macd, signal_line)
+        next_day_macd_trend = predict_macd_trend(macd.iloc[-1], signal_line.iloc[-1])
+        st.write(f"**Predicted Next Day Trend: {next_day_macd_trend}**")        
+        # st.write(f"Predicted Next Day Trend: {next_day_trend}")
+
+        # Additional Info
+        with st.expander("How is the prediction made?"):
             st.write("""
-                The MACD is a trend-following momentum indicator used in technical analysis to identify changes in the strength, direction, momentum, and duration of a trend in a stock’s price.\n
-                Buy Signal: When the MACD line crosses above the Signal line, it indicates bullish momentum. This is interpreted as a signal to buy or go long on the stock.\n
-                Sell Signal: When the MACD line crosses below the Signal line, it suggests bearish momentum. This is seen as a signal to sell or go short.
-            """)    
+            The trend prediction is based on RSI and MACD indicators:
+            - **Uptrend**: RSI is below 30 (oversold) and MACD is crossing above the signal line (bullish).
+            - **Downtrend**: RSI is above 70 (overbought) and MACD is crossing below the signal line (bearish).
+            - **Neutral**: No strong confirmation from both indicators.
+            """)
+    except Exception as e:
+        st.error(f"An unexpected error occurred: {e}")

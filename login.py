@@ -6,32 +6,41 @@ def login():
     """
     Login page for user authentication.
     """
-    st.title("Login")
-    st.write("Welcome to the Trade Bot! Please log in to continue.")
+    try:
 
-    # Initialize the database
-    initialize_database()
+        st.title("Login")
+        st.write("Welcome to the Trade Bot! Please log in to continue.")
 
-    # Input fields for login credentials
-    username = st.text_input("Username", placeholder="Enter your username")
-    password = st.text_input("Password", type="password", placeholder="Enter your password")
+        # Initialize the database
+        try:
+            initialize_database()
+        except Exception as db_error:
+            st.error(f"Database Initialization Error: {db_error}")
+            return False
 
-    # Login button
-    if st.button("Login"):
-        authenticated, role = authenticate_user(username, password)
-        if authenticated:
-            st.session_state.authenticated = True
-            st.session_state.username = username
-            st.session_state.role = role
-            #st.success("Login successful! Welcome back.")
-            st.rerun()  # Refresh the page to show authenticated content
-            st.session_state.page = "Load Data"  # Redirect to Load Data after login
-        else:
-            st.error("Invalid username or password. Please try again.")
+        # Input fields for login credentials
+        username = st.text_input("Username", placeholder="Enter your username")
+        password = st.text_input("Password", type="password", placeholder="Enter your password")
+
+        # Login button
+        if st.button("Login"):
+            authenticated, role = authenticate_user(username, password)
+            if authenticated:
+                st.session_state.authenticated = True
+                st.session_state.username = username
+                st.session_state.role = role
+                #st.success("Login successful! Welcome back.")
+                st.rerun()  # Refresh the page to show authenticated content
+                st.session_state.page = "Load Data"  # Redirect to Load Data after login
+            else:
+                st.error("Invalid username or password. Please try again.")
 
 
-    return st.session_state.get("authenticated", False)
+        return st.session_state.get("authenticated", False)
 
+    except Exception as e:
+        st.error(f"An unexpected error occurred: {e}")
+        return False
 def logout():
     """
     Logs out the user by resetting the session state.

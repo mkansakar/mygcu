@@ -1,12 +1,14 @@
 import numpy as np
 import pandas as pd
-import tensorflow as tf
 import streamlit as st
+import tensorflow as tf
 import matplotlib.pyplot as plt
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import LSTM, Dense, Dropout
+from tensorflow.keras.layers import LSTM, Dense, Dropout, BatchNormalization
+from tensorflow.keras.callbacks import EarlyStopping
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.model_selection import TimeSeriesSplit
+from sklearn.preprocessing import MinMaxScaler
 from data_preprocessing import preprocess_data, split_data
 
 def prepare_sequences(features, target, sequence_length=30):
@@ -26,8 +28,10 @@ def build_lstm_model(input_shape):
     """
     model = Sequential([
         LSTM(64, return_sequences=True, input_shape=input_shape),
+        BatchNormalization(),
         Dropout(0.2),
         LSTM(64, return_sequences=False),
+        BatchNormalization(),
         Dropout(0.2),
         Dense(32, activation='relu'),
         Dense(1, activation='sigmoid')  # Predicts movement (UP/DOWN)
@@ -42,16 +46,22 @@ def train_lstm_model():
     """
     st.title("LSTM Stock Price Movement Prediction")
 
-    if 'data' not in st.session_state:
-        st.error("Please load stock data first.")
+    # Check if preprocessed data exists
+    if 'filtered_features' not in st.session_state or st.session_state['filtered_features'] is None:
+        st.error("Please proceed with Data Preprocessing to load the preprocessed data.")
         return
 
     # Load and preprocess data
-    features, target, _ = split_data(st.session_state['filtered_features'])
+    proc_data = st.session_state['filtered_features'].copy()
+    features, target, splits = split_data(proc_data)
+
+    # Feature Scaling
+    scaler = MinMaxScaler()
+    features_scaled = scaler.fit_transform(features)
 
     # Convert data to sequences
     sequence_length = 30
-    X, y = prepare_sequences(features, target, sequence_length)
+    X, y = prepare_sequences(features_scaled, target, sequence_length)
 
     # Perform Time Series Cross-Validation
     tscv = TimeSeriesSplit(n_splits=5)
@@ -63,7 +73,13 @@ def train_lstm_model():
 
         # Build and train model
         model = build_lstm_model((sequence_length, X.shape[2]))
-        model.fit(X_train, y_train, epochs=10, batch_size=16, verbose=0)  # Reduce epochs for faster training
+        
+        # Use Early Stopping
+        early_stopping = EarlyStopping(monitor='loss', patience=3, restore_best_weights=True)
+
+        model.fit(
+            X_train, y_train, epochs=15, batch_size=32, verbose=0, callbacks=[early_stopping]
+        )  
 
         # Make predictions
         y_pred = (model.predict(X_test) > 0.5).astype(int)
@@ -95,4 +111,3 @@ def train_lstm_model():
     # Display Next-Day Prediction
     st.subheader("Next Day Prediction:")
     st.write(f"**Next Day Price Movement:** {movement}")
-
