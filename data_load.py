@@ -97,46 +97,85 @@ def load_data():
         By using this product, you acknowledge and agree to the terms of this disclaimer. Always perform your due diligence and exercise caution when making financial decisions.
         """)
 
+
 def display_fundamentals(symbol):
     """
-    Display fundamental stock data.
+    Display fundamental stock data with exception handling.
     """
-    st.subheader("Company Fundamentals")
-    stock = yf.Ticker(symbol)
-    
-    info = stock.info
-    info_table = {key: info[key] for key in ('shortName', 'sector', 'industry', 'country', 'website') if key in info}
-    company_info = pd.DataFrame(info_table.items(), columns=["Attribute", "Value"])
+    try:
+        st.subheader("Company Fundamentals")
 
-    key_stats = {
-        "EPS (TTM)": info.get("trailingEps"),
-        "Market Cap": info.get("marketCap"),
-        "PE Ratio (TTM)": info.get("trailingPE"),
-        "Dividend Yield": info.get("dividendYield"),
-        "52 Week High": info.get("fiftyTwoWeekHigh"),
-        "52 Week Low": info.get("fiftyTwoWeekLow")
-    }
-    key_statistics = pd.DataFrame(key_stats.items(), columns=["Attribute", "Value"])
+        # Fetch stock data from Yahoo Finance
+        try:
+            stock = yf.Ticker(symbol)
+            info = stock.info
+        except Exception as e:
+            st.error(f"Error fetching stock data for {symbol}: {e}")
+            return
 
-    col1, col2 = st.columns(2)
-    with col1:
-        st.table(company_info)
-    with col2:
-        st.table(key_statistics)
+        # Ensure the info dictionary contains data
+        if not info or "shortName" not in info:
+            st.error(f"No fundamental data available for {symbol}.")
+            return
 
-    with st.expander("What is Company Statistics?"):
-        st.write("""
-        EPS represents a company's profitability on a per-share basis. It shows how much profit is allocated to each outstanding share of common stock. A higher EPS generally indicates greater profitability.\n
+        # Extract company info safely
+        try:
+            info_table = {key: info[key] for key in ('shortName', 'sector', 'industry', 'country', 'website') if key in info}
+            company_info = pd.DataFrame(info_table.items(), columns=["Attribute", "Value"])
+        except Exception as e:
+            st.error(f"Error extracting company info: {e}")
+            company_info = pd.DataFrame(columns=["Attribute", "Value"])  # Empty DataFrame fallback
 
-        Market Cap measures the total value of a company's outstanding shares in the stock market. Larger companies tend to be more stable, while smaller ones may offer higher growth potential but carry more risk..\
+        # Extract key statistics safely
+        try:
+            key_stats = {
+                "EPS (TTM)": info.get("trailingEps", "N/A"),
+                "Market Cap": info.get("marketCap", "N/A"),
+                "PE Ratio (TTM)": info.get("trailingPE", "N/A"),
+                "Dividend Yield": info.get("dividendYield", "N/A"),
+                "52 Week High": info.get("fiftyTwoWeekHigh", "N/A"),
+                "52 Week Low": info.get("fiftyTwoWeekLow", "N/A")
+            }
+            key_statistics = pd.DataFrame(key_stats.items(), columns=["Attribute", "Value"])
+        except Exception as e:
+            st.error(f"Error extracting key statistics: {e}")
+            key_statistics = pd.DataFrame(columns=["Attribute", "Value"])  # Empty DataFrame fallback
 
-        The PE Ratio compares a company's stock price to its earnings per share, reflecting how much investors are willing to pay for each dollar of earnings.\n
-        High PE Ratio: Indicates investors expect higher growth in the future, but it may also signal overvaluation.\n
-        Low PE Ratio: Suggests undervaluation or slow growth expectations.\n
+        # Display company info and key statistics
+        col1, col2 = st.columns(2)
+        with col1:
+            if not company_info.empty:
+                st.table(company_info)
+            else:
+                st.warning("Company info is missing.")
 
-        Dividend Yield represents the annual dividend payout as a percentage of the stock's current price.\n
-        High Dividend Yield: Often attractive to income-focused investors but could indicate a declining stock price or unsustainable dividends.\n
-        Low Dividend Yield: Suggests a focus on growth rather than income. A useful metric for investors seeking regular income.
-        """)
+        with col2:
+            if not key_statistics.empty:
+                st.table(key_statistics)
+            else:
+                st.warning("Key statistics are missing.")
+
+        # Expandable section for explanation
+        with st.expander("What is Company Statistics?"):
+            st.write("""
+            **EPS (Earnings Per Share)** represents a company's profitability on a per-share basis.
+            It shows how much profit is allocated to each outstanding share of common stock. 
+            A higher EPS generally indicates greater profitability.\n
+
+            **Market Cap** measures the total value of a company's outstanding shares in the stock market. 
+            Larger companies tend to be more stable, while smaller ones may offer higher growth potential but carry more risk.\n
+
+            **PE Ratio (Price-to-Earnings Ratio)** compares a company's stock price to its earnings per share, 
+            reflecting how much investors are willing to pay for each dollar of earnings.\n
+            - High PE Ratio: Indicates investors expect higher growth in the future, but it may also signal overvaluation.\n
+            - Low PE Ratio: Suggests undervaluation or slow growth expectations.\n
+
+            **Dividend Yield** represents the annual dividend payout as a percentage of the stock's current price.\n
+            - High Dividend Yield: Often attractive to income-focused investors but could indicate a declining stock price or unsustainable dividends.\n
+            - Low Dividend Yield: Suggests a focus on growth rather than income. A useful metric for investors seeking regular income.
+            """)
+
+    except Exception as e:
+        st.error(f"An unexpected error occurred: {e}")
 
   

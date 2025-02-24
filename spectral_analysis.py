@@ -9,55 +9,60 @@ def spectral_analysis():
     """
     Perform spectral analysis on stock prices to identify dominant frequencies.
     """
+    try:
 
-    if 'session_data' not in st.session_state or st.session_state['session_data'] is None:
-        st.error("Please load the data first from the sidebar on the left.")
-        return
+        if 'session_data' not in st.session_state or st.session_state['session_data'] is None:
+            st.error("Please load the data first from the sidebar on the left.")
+            return
 
-    st.title("Spectral Analysis of Stock Prices")
-    st.markdown(f"Stock: {st.session_state['symbol']}")
+        st.title("Spectral Analysis of Stock Prices")
+        st.markdown(f"Stock: {st.session_state['symbol']}")
 
-    # Load the data
-    #data = st.session_state['data']
-    data = st.session_state['session_data'].tail(180)
+        # Load the data
+        #data = st.session_state['data']
+        data = st.session_state['session_data'].tail(180)
 
-    # Select column for analysis
-    column = st.selectbox("Select a column for spectral analysis", data.columns, index=data.columns.get_loc("Close"))
+        # Select column for analysis
+        column = st.selectbox("Select a column for spectral analysis", data.columns, index=data.columns.get_loc("Close"))
 
-    # Compute the power spectral density
-    st.subheader("Frequency Domain Analysis")
-    #detrend = st.checkbox("Apply Detrending")
-    #normalize = st.checkbox("Normalize Data")   
+        # Compute the power spectral density
+        st.subheader("Frequency Domain Analysis")
+        #detrend = st.checkbox("Apply Detrending")
+        #normalize = st.checkbox("Normalize Data")   
 
-    #data = data[column].dropna()
-    #data = data.to_numpy()
+        #data = data[column].dropna()
+        #data = data.to_numpy()
 
-    # if detrend:
-    #     data = data - data.mean()
-    # if normalize:
-    #     data = (data - data.min()) / (data.max() - data.min())
+        # if detrend:
+        #     data = data - data.mean()
+        # if normalize:
+        #     data = (data - data.min()) / (data.max() - data.min())
 
 
-    freq, power = periodogram(data, scaling='spectrum')
+        freq, power = periodogram(data, scaling='spectrum')
 
-    # Create a DataFrame for visualization
-    spectral_df = pd.DataFrame({"Frequency": freq, "Power": power})
+        # Create a DataFrame for visualization
+        spectral_df = pd.DataFrame({"Frequency": freq, "Power": power})
 
-    # Plot the power spectral density
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=spectral_df["Frequency"], y=spectral_df["Power"], mode="lines", name="Power Spectrum"))
-    fig.update_layout(
-        title="Power Spectral Density",
-        xaxis_title="Frequency",
-        yaxis_title="Power",
-        template="plotly_white"
-    )
-    st.plotly_chart(fig)
+        # Plot the power spectral density
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=spectral_df["Frequency"], y=spectral_df["Power"], mode="lines", name="Power Spectrum"))
+        fig.update_layout(
+            title="Power Spectral Density",
+            xaxis_title="Frequency",
+            yaxis_title="Power",
+            template="plotly_white"
+        )
+        st.plotly_chart(fig)
 
-    # Highlight dominant frequencies
-    st.subheader("Dominant Frequencies")
-    top_frequencies = spectral_df.nlargest(5, "Power")
-    st.write(top_frequencies)
+        # Highlight dominant frequencies
+        st.subheader("Dominant Frequencies")
+        top_frequencies = spectral_df.nlargest(5, "Power")
+        st.write(top_frequencies)
+        
+    except Exception as e:
+        st.error(f"An unexpected error occurred: {e}")
+
 
     with st.expander("What is Spectral Analysis?"):
         st.write("""

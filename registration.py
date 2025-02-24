@@ -10,7 +10,11 @@ def register_user():
     st.write("Create your account to access the Stock Price Prediction Data Product.")
 
     # Initialize the database
-    initialize_database()
+    try:
+        initialize_database()
+    except Exception as db_error:
+        st.error(f"Database Initialization Error: {db_error}")
+        return False
 
     # Input fields for new user credentials
     username = st.text_input("Choose a Username", placeholder="Enter your username")

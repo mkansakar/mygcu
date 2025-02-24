@@ -5,15 +5,7 @@ import plotly.graph_objects as go
 
 def calculate_stochastic(data, k_period=14, d_period=3, column='Close'):
     """
-    Calculate the Stochastic Oscillator.
-    Args:
-        data (DataFrame): The stock price data.
-        k_period (int): The lookback period for %K.
-        d_period (int): The moving average period for %D.
-        column (str): The column used to calculate the Stochastic Oscillator.
-
-    Returns:
-        DataFrame: A DataFrame containing %K and %D values.
+    Calculate the Stochastic Oscillator and predict next day's price movement.
     """
     high_max = data['High'].rolling(window=k_period).max()
     low_min = data['Low'].rolling(window=k_period).min()
@@ -24,55 +16,92 @@ def calculate_stochastic(data, k_period=14, d_period=3, column='Close'):
     # %D calculation (SMA of %K)
     d = k.rolling(window=d_period).mean()
 
-    return pd.DataFrame({'%K': k, '%D': d}, index=data.index)
+    # Identify overbought & oversold levels
+    data['%K'] = k
+    data['%D'] = d
+
+    # Identify potential buy and sell signals
+    data['Stochastic_Signal'] = "Neutral"
+
+    # Bullish signal: %K crosses above %D and both are in oversold region (< 20)
+    data.loc[(data['%K'] > data['%D']) & (data['%K'] < 20), 'Stochastic_Signal'] = "Bullish - Possible Uptrend"
+
+    # Bearish signal: %K crosses below %D and both are in overbought region (> 80)
+    data.loc[(data['%K'] < data['%D']) & (data['%K'] > 80), 'Stochastic_Signal'] = "Bearish - Possible Downtrend"
+
+    return data[['%K', '%D', 'Stochastic_Signal']]
+
+def determine_next_trend(data):
+    """
+    Determine the next day's price movement based on the Stochastic Oscillator.
+    """
+    if len(data) < 2:
+        return "Not enough data to determine the trend."
+
+    last_signal = data['Stochastic_Signal'].iloc[-1]
+
+    if "Bullish" in last_signal:
+        return "Likely Uptrend"
+    elif "Bearish" in last_signal:
+        return "Likely Downtrend"
+    else:
+        return "No Clear Trend"
 
 def stochastic_analysis():
-    """
-    Perform stochastic analysis and visualize %K and %D indicators.
-    """
+    try:
 
-    if 'session_data' not in st.session_state or st.session_state['session_data'] is None:
-        st.error("Please load the data first from the sidebar on the left.")
-        return
+        """
+        Perform stochastic analysis, visualize %K and %D indicators, and predict next-day movement.
+        """
+    
+        if 'session_data' not in st.session_state or st.session_state['session_data'] is None:
+            st.error("Please use Load Data button on left menu to load the data first.")
+            return
 
-    st.title("Stochastic Analysis")
-    st.markdown(f"Stock: {st.session_state['symbol']}")
-    #data = st.session_state['data']
-    data = st.session_state['session_data'].tail(180)
+        st.title("Stochastic Analysis")
+        st.markdown(f"Stock: {st.session_state['symbol']}")
 
-    # Inputs for Stochastic Oscillator
-    k_period = st.slider("Select %K Period", min_value=5, max_value=20, value=14, step=1)
-    d_period = st.slider("Select %D Period (SMA of %K)", min_value=3, max_value=10, value=3, step=1)
+        data = st.session_state['session_data'].tail(252)
 
-    if 'High' not in data.columns or 'Low' not in data.columns or 'Close' not in data.columns:
-        st.error("The dataset must include 'High', 'Low', and 'Close' columns.")
-        return
+        # Inputs for Stochastic Oscillator
+        k_period = st.slider("Select %K Period", min_value=5, max_value=20, value=14, step=1)
+        d_period = st.slider("Select %D Period (SMA of %K)", min_value=3, max_value=10, value=3, step=1)
 
-    # Calculate Stochastic Oscillator
-    stochastic_df = calculate_stochastic(data, k_period=k_period, d_period=d_period)
+        if 'High' not in data.columns or 'Low' not in data.columns or 'Close' not in data.columns:
+            st.error("The dataset must include 'High', 'Low', and 'Close' columns.")
+            return
 
-    #st.subheader("Stochastic Oscillator Values")
-    #st.write(stochastic_df.tail())
+        # Calculate Stochastic Oscillator
+        stochastic_df = calculate_stochastic(data, k_period=k_period, d_period=d_period)
 
-    # Plot %K and %D
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=stochastic_df.index, y=stochastic_df['%K'], mode='lines', name='%K'))
-    fig.add_trace(go.Scatter(x=stochastic_df.index, y=stochastic_df['%D'], mode='lines', name='%D', line=dict(dash='dot')))
-    fig.update_layout(
-        title="Stochastic Oscillator",
-        xaxis_title="Date",
-        yaxis_title="Stochastic Value",
-        template="plotly_white"
-    )
-    st.plotly_chart(fig)
-    with st.expander("What is Stochastic Analysis?"):
-        st.write("""
-            The Stochastic Oscillator is a momentum indicator commonly used in technical analysis to assess the closing price of a security relative to its price range over a specific period.\n 
-            A bullish signal occurs when %K crosses above %D in the oversold region.\n
-            A bearish signal occurs when %K crosses below %D in the overbought region.\n
-            Overbought (Above 80): Indicates that the price is trading near the upper end of its recent range and may be due for a correction or reversal.\n
-            Oversold (Below 20): Suggests the price is trading near the lower end of its recent range and may be due for a rebound. \n    
-            If the price makes a new high but the oscillator does not, it indicates weakening momentum (bearish divergence).\n
-            If the price makes a new low but the oscillator does not, it indicates strengthening momentum (bullish divergence).
+        # Plot %K and %D
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=stochastic_df.index, y=stochastic_df['%K'], mode='lines', name='%K'))
+        fig.add_trace(go.Scatter(x=stochastic_df.index, y=stochastic_df['%D'], mode='lines', name='%D', line=dict(dash='dot')))
+        fig.update_layout(
+            title="Stochastic Oscillator",
+            xaxis_title="Date",
+            yaxis_title="Stochastic Value",
+            template="plotly_white"
+        )
+        st.plotly_chart(fig)
 
-        """)
+        # Display Next-Day Price Movement Prediction
+        #st.subheader("Next Day Price Movement Prediction Based on Stochastic Analysis")
+        
+        trend_prediction = determine_next_trend(stochastic_df)
+        st.write(f"**Stochastic Analysis: {trend_prediction}**")   
+
+        with st.expander("What is Stochastic Analysis?"):
+            st.write("""
+                The Stochastic Oscillator is a momentum indicator used to assess the closing price of a stock relative to its price range over a specific period.
+                
+                Key Insights:
+                - Overbought (> 80): The stock is trading near the upper range and may face a correction.
+                - Oversold (< 20): The stock is trading near the lower range and may see a rebound.
+                - Bullish Signal: When %K crosses above %D in the oversold region, suggesting a potential **uptrend**.
+                - Bearish Signal: When %K crosses below %D in the overbought region, suggesting a potential **downtrend**.
+            """)
+            
+    except Exception as e:
+        st.error(f"An unexpected error occurred: {e}")
