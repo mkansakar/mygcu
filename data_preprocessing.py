@@ -184,8 +184,10 @@ def preprocess_data():
 
         #Define Features & Target
         features = data[['Close', 'SMA_10', 'SMA_20', 'RSI', 'MACD', 'Signal_Line', 'Momentum', 'Daily_Return',
-                        'ATR', 'CMF', 'BB_Upper', 'BB_Lower', 'BB_Width', 'Gold_Close', 'GBPUSD']]
+                        'ATR', 'CMF', 'BB_Upper', 'BB_Lower', 'BB_Width', 'Gold_Close', 'GBPUSD', 'VIX_Close', 'Oil_Close', 'SNP_Close']]
+        # features = data
         target = (data['Close'].shift(-1) > data['Close']).astype(int)
+
 
         # Calculate the ratio of 0s and 1s
         target_counts = target.value_counts()
