@@ -55,10 +55,26 @@ def load_data():
             pound.index = pd.to_datetime(pound.index).date
             #st.write(pound.tail(2)) 
 
-            
-            data = data.join(gold, how='left')
-            data = data.join(pound, how='left')
+            # Fetch VIX (Volatility Index)
+            vix = yf.Ticker("^VIX").history(start=start_date, end=end_date)
+            vix = vix[['Close']].rename(columns={'Close': 'VIX_Close'})
+            vix.index = pd.to_datetime(vix.index).date
 
+            # Fetch Oil Prices (Crude Oil WTI Futures)
+            oil = yf.Ticker("CL=F").history(start=start_date, end=end_date)
+            oil = oil[['Close']].rename(columns={'Close': 'Oil_Close'})
+            oil.index = pd.to_datetime(oil.index).date            
+
+            # Fetch Oil Prices (Crude Oil WTI Futures)
+            snp500 = yf.Ticker("^GSPC").history(start=start_date, end=end_date)
+            snp500 = snp500[['Close']].rename(columns={'Close': 'SNP_Close'})
+            snp500.index = pd.to_datetime(snp500.index).date 
+
+            # data = data.join(gold, how='left')
+            # data = data.join(pound, how='left')
+            data = data.join([gold, pound, vix, snp500, oil], how='left')
+
+            
             if not data.empty:
                 st.subheader(f"{stock_symbol} Closing Price")
                 fig = px.line(data, x=data.index, y="Close")

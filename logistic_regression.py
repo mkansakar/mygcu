@@ -11,56 +11,62 @@ from sklearn.model_selection import TimeSeriesSplit
 
 
 def logistic_regression():
-    if 'filtered_features' not in st.session_state or st.session_state['filtered_features'] is None:
-        st.error("Please proceed with Data Preprocessing to load the preproceed data.")
-        return
-    
-    st.title("Logistic Regression Price Movement")
-    st.markdown(f"Stock: {st.session_state['symbol']}")
-    
-    # Preprocess data
-    #st.dataframe(st.session_state['filtered_features'].tail(2))
-    #proc_data = st.session_state['filtered_features'].copy()
+    try:
+        if 'filtered_features' not in st.session_state or st.session_state['filtered_features'] is None:
+            st.error("Please proceed with Data Preprocessing to load the preprocessed data.")
+            return
+        
+        st.title("Logistic Regression Price Movement")
+        st.markdown(f"Stock: {st.session_state['symbol']}")
+        
+        # Preprocess data
+        #st.dataframe(st.session_state['filtered_features'].tail(2))
+        #proc_data = st.session_state['filtered_features'].copy()
 
 
 
-    features, target, _ = split_data(st.session_state['filtered_features']) # Ensure `split_data()` returns clean X, y
+        features, target, _ = split_data(st.session_state['filtered_features']) # Ensure `split_data()` returns clean X, y
 
-    features = pd.DataFrame(features)  # Convert features to DataFrame
-    target = pd.Series(target).reset_index(drop=True)  # Convert target to Pandas Series   
+        features = pd.DataFrame(features)  # Convert features to DataFrame
+        target = pd.Series(target).reset_index(drop=True)  # Convert target to Pandas Series   
 
-    # Time Series Cross-Validation
-    tscv = TimeSeriesSplit(n_splits=5)  # Define 5 folds for time-series cross-validation
-    accuracies, precisions, recalls, f1_scores = [], [], [], []
-    
-    for train_idx, test_idx in tscv.split(features):
-        X_train, X_test = features.iloc[train_idx], features.iloc[test_idx]
-        y_train, y_test = target.iloc[train_idx], target.iloc[test_idx]
+        # Time Series Cross-Validation
+        tscv = TimeSeriesSplit(n_splits=5)  # Define 5 folds for time-series cross-validation
+        accuracies, precisions, recalls, f1_scores = [], [], [], []
+        try: 
 
-        model = LogisticRegression(max_iter=1000)
-        model.fit(X_train, y_train)
-        predictions = model.predict(X_test)
+            for train_idx, test_idx in tscv.split(features):
+                X_train, X_test = features.iloc[train_idx], features.iloc[test_idx]
+                y_train, y_test = target.iloc[train_idx], target.iloc[test_idx]
 
-        # Compute metrics
-        accuracies.append(accuracy_score(y_test, predictions))
-        precisions.append(precision_score(y_test, predictions))
-        recalls.append(recall_score(y_test, predictions))
-        f1_scores.append(f1_score(y_test, predictions))
-    
-    # Display averaged performance metrics
-    st.write("__Model Performance Across Time-Series Splits__:")    
-    st.write(f"Accuracy: {np.mean(accuracies) * 100:.2f}%")
-    st.write(f"Precision: {np.mean(precisions):.2f}")
-    st.write(f"Recall: {np.mean(recalls):.2f}")
-    st.write(f"F1 Score: {np.mean(f1_scores):.2f}")
-    
-    # Predict next day's movement
-    st.write("__Next Day Prediction__:")    
-    last_row = features.iloc[[-1]]  # Corrected reshape for single sample
-    prediction = model.predict(last_row)
-    st.write("Next Day Price Movement: **Up**" if prediction[0] == 1 else "Next Day Price Movement: **Down**")
+                model = LogisticRegression(max_iter=1000)
+                model.fit(X_train, y_train)
+                predictions = model.predict(X_test)
 
+                # Compute metrics
+                accuracies.append(accuracy_score(y_test, predictions))
+                precisions.append(precision_score(y_test, predictions))
+                recalls.append(recall_score(y_test, predictions))
+                f1_scores.append(f1_score(y_test, predictions))
+        except Exception as train_error:
+            raise RuntimeError(f"Model Training Error: {train_error}")       
+        
+        
+        # Display averaged performance metrics
+        st.write("__Model Performance Across Time-Series Splits__:")    
+        st.write(f"Accuracy: {np.mean(accuracies) * 100:.2f}%")
+        st.write(f"Precision: {np.mean(precisions):.2f}")
+        st.write(f"Recall: {np.mean(recalls):.2f}")
+        st.write(f"F1 Score: {np.mean(f1_scores):.2f}")
+        
+        # Predict next day's movement
+        st.write("__Next Day Prediction__:")    
+        last_row = features.iloc[[-1]]  # Corrected reshape for single sample
+        prediction = model.predict(last_row)
+        st.write("Next Day Price Movement: **Up**" if prediction[0] == 1 else "Next Day Price Movement: **Down**")
 
+    except Exception as e:
+        st.error(f"An unexpected error occurred: {e}")
     #st.write(st.session_state['filtered_features'].tail(2))
 
     with st.expander("What is Logistic Regression?"):
