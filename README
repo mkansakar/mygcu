@@ -30,9 +30,12 @@ System Architecture:
 
 
 Installation:
-In Windows, open Command Prompt and run the following commands:
+In Microsoft Windows 10/11, open Command Prompt and run the following commands:
 Install Python (if not already installed): 
 Download and install it from Python's official website.
+
+It is assumed that user has administrative rights to install packages and dependencies.
+It is recommended to use a virtual environment to avoid conflicts with other Python projects.
 
 Clone the Repository:
 git clone https://github.com/mkansakar/mygcu.git
@@ -48,20 +51,5 @@ pip install -r requirements.txt
 Run the Application
 streamlit run app.py
 
-In MacBooks, open Terminal and run the following commands:
-
-Clone the Repository
-git clone https://github.com/mkansakar/mygcu.git
-cd mygcu
-
-Set Up a Virtual Environment:
-python3 -m venv venv
-source venv/bin/activate
-
-Install Dependencies:
-pip install -r requirements.txt
-
-Run the Application
-streamlit run app.py
 
 License: This project is licensed under the GCU or open-source License.
