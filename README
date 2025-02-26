@@ -34,6 +34,7 @@ In Microsoft Windows 10/11, open Command Prompt and run the following commands:
 Install Python (if not already installed): 
 Download and install it from Python's official website.
 
+Python 3.12.1 is recommended for this project.
 It is assumed that user has administrative rights to install packages and dependencies.
 It is recommended to use a virtual environment to avoid conflicts with other Python projects.
 
